@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// --- INLINE SVG ICONS (Icons කිසිදා කැඩී නොයන ලෙස සකසා ඇත) ---
+// --- INLINE SVG ICONS ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -26,6 +26,7 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
   );
 };
 
+const COMPANY_LOGO = 'Compnay Logo.jpg';
 const CAR_IMG = 'Car.jpg';
 const LORRY_IMG = 'Lorry.jpg';
 const BIKE_IMG = 'Motocycle.png';
@@ -44,35 +45,34 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
-  // LocalStorage එකෙන් Data Load කර ගැනීම
   const [data, setData] = useState(() => {
-    const saved = localStorage.getItem('wgYardData_v4');
+    const saved = localStorage.getItem('wgYardData_v5');
     return saved ? JSON.parse(saved) : INITIAL_DATA;
   });
 
   const [seizers, setSeizers] = useState(() => {
-    const saved = localStorage.getItem('wgSeizersData_v4');
+    const saved = localStorage.getItem('wgSeizersData_v5');
     return saved ? JSON.parse(saved) : INITIAL_SEIZERS;
   });
 
   const [yardFiles, setYardFiles] = useState(() => {
-    const saved = localStorage.getItem('wgYardFiles_v4');
+    const saved = localStorage.getItem('wgYardFiles_v5');
     return saved ? JSON.parse(saved) : [];
   });
 
-  useEffect(() => { localStorage.setItem('wgYardData_v4', JSON.stringify(data)); }, [data]);
-  useEffect(() => { localStorage.setItem('wgSeizersData_v4', JSON.stringify(seizers)); }, [seizers]);
-  useEffect(() => { localStorage.setItem('wgYardFiles_v4', JSON.stringify(yardFiles)); }, [yardFiles]);
+  useEffect(() => { localStorage.setItem('wgYardData_v5', JSON.stringify(data)); }, [data]);
+  useEffect(() => { localStorage.setItem('wgSeizersData_v5', JSON.stringify(seizers)); }, [seizers]);
+  useEffect(() => { localStorage.setItem('wgYardFiles_v5', JSON.stringify(yardFiles)); }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginCreds, setLoginCreds] = useState({ user: '', pass: '' });
 
-  // Wizard State
+  // Wizard Form State
   const [wizardStep, setWizardStep] = useState(1);
   const [formData, setFormData] = useState({
-    actionType: 'Seized', // Seized or Handover
+    actionType: 'Seized',
     contractNo: '', trs: false, clientName: '', vehicleNo: '', vehicleType: 'Motorcycle',
     seizerName: '', seizerID: '', orderStatus: 'ACTIVE', seizedDate: '',
     yardLocation: 'Kurunegala Yard', offsiteBranch: '',
@@ -81,10 +81,8 @@ export default function App() {
     docsMTA6: false, docsID: false, docsHForm: false, docsLetter: false, remarks: ''
   });
 
-  // New Seizer Form
   const [newSeizer, setNewSeizer] = useState({ name: '', nic: '', phone: '' });
 
-  // Send Files to Yard Form
   const [yardDispatch, setYardDispatch] = useState({
     contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false
   });
@@ -96,7 +94,7 @@ export default function App() {
       setShowLogin(false);
       setLoginCreds({ user: '', pass: '' });
     } else {
-      alert("වලංගු නොවන Admin තොරතුරු!");
+      alert("Invalid Admin Credentials!");
     }
   };
 
@@ -108,18 +106,18 @@ export default function App() {
   const submitNewSeizer = (e) => {
     e.preventDefault();
     if (!newSeizer.name || !newSeizer.nic) {
-      alert("කරුණාකර Seizer ගේ නම සහ ID අංකය ඇතුළත් කරන්න.");
+      alert("Please enter Seizer Name and NIC.");
       return;
     }
     const added = { id: Date.now().toString(), ...newSeizer };
     setSeizers([...seizers, added]);
     setNewSeizer({ name: '', nic: '', phone: '' });
-    alert("අලුත් Seizer සාර්ථකව පද්ධතියට එක් කරන ලදී!");
+    alert("New Seizer added successfully!");
   };
 
   const submitForm = () => {
     if (!formData.contractNo || !formData.vehicleNo) {
-      alert("Contract No සහ Vehicle No අනිවාර්යයෙන්ම ඇතුළත් කළ යුතුය.");
+      alert("Contract No and Vehicle No are required.");
       return;
     }
     const newEntry = {
@@ -152,13 +150,13 @@ export default function App() {
     setData([newEntry, ...data]);
     setActiveTab('dashboard');
     setWizardStep(1);
-    alert("දත්ත සාර්ථකව ඇතුළත් කරන ලදී!");
+    alert("Record successfully saved!");
   };
 
   const submitYardDispatch = (e) => {
     e.preventDefault();
     if (!yardDispatch.contractNo || !yardDispatch.vehicleNo || !yardDispatch.toWhom || !yardDispatch.epfNo) {
-      alert("කරුණාකර සියලුම තොරතුරු සම්පූර්ණ කරන්න.");
+      alert("Please fill all required fields.");
       return;
     }
     const newDispatch = {
@@ -168,10 +166,9 @@ export default function App() {
     };
     setYardFiles([newDispatch, ...yardFiles]);
     setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false });
-    alert("ලිපිගොනු Yard එකට යැවීමේ සටහන සුරැකිණි!");
+    alert("Yard file dispatch recorded!");
   };
 
-  // Export to Excel / CSV
   const exportToExcel = () => {
     let csvContent = "\uFEFFContract No,Vehicle No,Client Name,Type,Method,Yard/Branch,Status,TRS,Outstanding,Sold,Client Paid,Seizer Payment,Documents\n";
     data.forEach(row => {
@@ -188,7 +185,6 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  // Import from Excel / CSV
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -222,7 +218,7 @@ export default function App() {
       }
       if (imported.length > 0) {
         setData([...imported, ...data]);
-        alert(`${imported.length} ක් වන දත්ත සාර්ථකව Import කරන ලදී!`);
+        alert(`${imported.length} records imported successfully!`);
       }
     };
     reader.readAsText(file);
@@ -247,15 +243,22 @@ export default function App() {
   return (
     <div className="flex h-screen bg-[#f4f7fb] text-slate-800 font-sans">
       
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
+      {/* Sidebar with Company Logo next to App Title */}
+      <aside className="w-68 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
         <div>
-          <div className="h-24 flex items-center justify-center border-b border-white/10 mx-6">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 rounded-2xl bg-white text-[#7a3aec] flex items-center justify-center shadow-lg">
-                <Icon name="fileText" className="w-6 h-6" />
+          {/* Logo & Title Header */}
+          <div className="h-28 flex items-center justify-center border-b border-white/10 mx-4 px-2">
+            <div className="flex items-center gap-3 bg-white/10 p-2.5 rounded-2xl w-full shadow-inner">
+              <img 
+                src={COMPANY_LOGO} 
+                alt="Company Logo" 
+                className="h-10 w-12 object-contain bg-white rounded-xl p-1 shadow-md"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+              <div className="overflow-hidden">
+                <h1 className="text-white font-black tracking-wider text-sm truncate">WG YARD</h1>
+                <p className="text-[10px] text-white/80 font-bold uppercase tracking-wider truncate">COMMERCIAL CREDIT</p>
               </div>
-              <h1 className="text-white font-bold tracking-wider text-sm mt-2">WG YARD</h1>
             </div>
           </div>
           
@@ -423,19 +426,18 @@ export default function App() {
             <div className="max-w-3xl mx-auto bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
               <h2 className="text-2xl font-bold mb-6 text-slate-800">New Vehicle Journal Entry</h2>
               
-              {/* Wizard Steps */}
               {wizardStep === 1 && (
                 <div className="space-y-5">
                   <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 mb-4">
-                    <label className="text-xs font-bold text-purple-700 uppercase block mb-2">1. වාහනය ඇතුළත් වන ක්‍රමය (Method) *</label>
+                    <label className="text-xs font-bold text-purple-700 uppercase block mb-2">1. Vehicle Entry Method *</label>
                     <div className="flex gap-4">
                       <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Seized' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Seized" checked={formData.actionType === 'Seized'} onChange={handleFormChange} className="hidden" />
-                        SEIZED (අත්අඩංගුවට ගැනීම)
+                        SEIZED
                       </label>
                       <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Handover' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Handover" checked={formData.actionType === 'Handover'} onChange={handleFormChange} className="hidden" />
-                        HANDOVER (භාරදීම)
+                        HANDOVER
                       </label>
                     </div>
                   </div>
@@ -465,7 +467,7 @@ export default function App() {
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase">Seizer</label>
                       <select name="seizerName" value={formData.seizerName} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold">
-                        <option value="">Seizer තෝරන්න</option>
+                        <option value="">Select Seizer</option>
                         {seizers.map(s => <option key={s.id} value={s.name}>{s.name} ({s.nic})</option>)}
                       </select>
                     </div>
@@ -477,18 +479,18 @@ export default function App() {
                     <select name="yardLocation" value={formData.yardLocation} onChange={handleFormChange} className="w-full bg-white border p-3 rounded-xl font-bold text-slate-800">
                       <option value="Kurunegala Yard">Kurunegala Yard</option>
                       <option value="Homagama Yard">Homagama Yard</option>
-                      <option value="Offsite Yard">Offsite Yard (වෙනත් ශාඛාවක්)</option>
+                      <option value="Offsite Yard">Offsite Yard</option>
                     </select>
 
                     {formData.yardLocation === 'Offsite Yard' && (
                       <div className="mt-3 animate-in fade-in">
-                        <label className="text-xs font-bold text-blue-600 uppercase block mb-1">Offsite Branch Name (ශාඛාවේ නම ලියන්න) *</label>
+                        <label className="text-xs font-bold text-blue-600 uppercase block mb-1">Offsite Branch Name *</label>
                         <input type="text" name="offsiteBranch" value={formData.offsiteBranch} onChange={handleFormChange} placeholder="e.g. Kandy Branch, Galle Branch" className="w-full bg-white border border-blue-400 p-3 rounded-xl font-semibold" />
                       </div>
                     )}
                   </div>
 
-                  <button onClick={() => setWizardStep(2)} className="w-full py-4 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-4">ඊළඟ පියවර (මූල්‍ය විස්තර)</button>
+                  <button onClick={() => setWizardStep(2)} className="w-full py-4 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-4">Next Step (Financials)</button>
                 </div>
               )}
 
@@ -502,16 +504,16 @@ export default function App() {
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase">Client Paid?</label>
                       <select name="clientPaid" value={formData.clientPaid} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
-                        <option value="No">No (නැත)</option>
-                        <option value="Yes">Yes (ගෙවා ඇත)</option>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
                       </select>
                     </div>
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase">Seizer Payment Complete or Not *</label>
                       <select name="seizerPaymentStatus" value={formData.seizerPaymentStatus} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
-                        <option value="Pending">Pending (ගෙවීමට ඇත)</option>
-                        <option value="Completed">Completed (ගෙවා අවසන්)</option>
-                        <option value="Not Paid">Not Paid (නැත)</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Not Paid">Not Paid</option>
                       </select>
                     </div>
                   </div>
@@ -532,8 +534,8 @@ export default function App() {
                   </div>
 
                   <div className="flex gap-4 pt-6">
-                    <button onClick={() => setWizardStep(1)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">ආපසු</button>
-                    <button onClick={submitForm} className="flex-2 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">Save Entry (ඇතුළත් කරන්න)</button>
+                    <button onClick={() => setWizardStep(1)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Back</button>
+                    <button onClick={submitForm} className="flex-2 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">Save Entry</button>
                   </div>
                 </div>
               )}
@@ -555,15 +557,15 @@ export default function App() {
                     <input type="text" value={yardDispatch.vehicleNo} onChange={e => setYardDispatch({...yardDispatch, vehicleNo: e.target.value})} placeholder="e.g. SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom (කාටද භාරදුන්නේ) *</label>
-                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="නම ඇතුළත් කරන්න" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
+                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom *</label>
+                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="Receiver Name" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">EPF No (EPF අංකය) *</label>
-                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="EPF අංකය" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
+                    <label className="text-xs font-bold text-slate-500 uppercase">EPF No *</label>
+                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="Receiver EPF No" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">Date Sent (යැවූ දිනය) *</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Date Sent *</label>
                     <input type="date" value={yardDispatch.sentDate} onChange={e => setYardDispatch({...yardDispatch, sentDate: e.target.value})} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div className="flex gap-4 pt-2">
@@ -576,7 +578,7 @@ export default function App() {
                       <span className="text-sm font-bold">ID Copy</span>
                     </label>
                   </div>
-                  <button type="submit" className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg mt-4">Record Dispatch (යැවූ බව සටහන් කරන්න)</button>
+                  <button type="submit" className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg mt-4">Record Dispatch</button>
                 </form>
               </div>
 
@@ -584,7 +586,7 @@ export default function App() {
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Dispatch History</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
-                  {yardFiles.length === 0 ? <p className="text-slate-400 text-sm">තවම වාර්තා නැත.</p> : yardFiles.map(f => (
+                  {yardFiles.length === 0 ? <p className="text-slate-400 text-sm">No dispatches recorded yet.</p> : yardFiles.map(f => (
                     <div key={f.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
                       <div>
                         <div className="font-bold text-blue-700">{f.contractNo} - {f.vehicleNo}</div>
@@ -617,11 +619,10 @@ export default function App() {
                     <label className="text-xs font-bold text-slate-500 uppercase">Contact Phone</label>
                     <input type="text" value={newSeizer.phone} onChange={e => setNewSeizer({...newSeizer, phone: e.target.value})} placeholder="07XXXXXXXX" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
                   </div>
-                  <button type="submit" className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-2">Add Seizer (ලියාපදිංචි කරන්න)</button>
+                  <button type="submit" className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-2">Add Seizer</button>
                 </form>
               </div>
 
-              {/* Seizers List */}
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Registered Seizers</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
@@ -645,14 +646,14 @@ export default function App() {
               <h2 className="text-2xl font-bold mb-4 text-slate-800">System Reset & Danger Zone</h2>
               <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl">
                 <h3 className="text-lg font-bold text-rose-700">Clear All System Data</h3>
-                <p className="text-sm text-rose-600 mt-1 mb-4">මෙහිදී පද්ධතියේ ඇති සියලුම Journal Entries, Seizer Records සහ Yard Dispatches සම්පූර්ණයෙන්ම මැකී යයි. මෙම ක්‍රියාව ආපසු හැරවිය නොහැක.</p>
+                <p className="text-sm text-rose-600 mt-1 mb-4">This will permanently delete all journal entries and records from local storage.</p>
                 <button 
                   onClick={() => {
-                    if (window.confirm("ඔබට සම්පූර්ණ දත්ත මකා දමා පද්ධතිය Reset කිරීමට අවශ්‍යද?")) {
+                    if (window.confirm("Are you sure you want to reset all data?")) {
                       localStorage.clear();
                       setData([]);
                       setYardFiles([]);
-                      alert("පද්ධතියේ සියලු දත්ත සාර්ථකව Reset විය.");
+                      alert("All data reset successfully!");
                     }
                   }} 
                   className="px-6 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-md hover:bg-rose-700"
