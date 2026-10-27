@@ -1,29 +1,35 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- ERROR BOUNDARY (White Screen සම්පූර්ණයෙන්ම වළක්වයි) ---
+// --- ERROR BOUNDARY (White Screen සම්පූර්ණයෙන්ම වළක්වා ආරක්ෂා කරයි) ---
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMsg: '' };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, errorMsg: error?.message || 'Unknown Error' };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught:", error, errorInfo);
   }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 text-center">
-          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-800 mb-2">පද්ධතියේ දෝෂයක් මඟහරවන ලදී</h2>
-            <p className="text-sm text-slate-500 mb-6">පරණ LocalStorage Cache දත්ත නිසා ඇතිවූ ගැටලුවකි. පහත බොත්තම ඔබා Reset කරන්න.</p>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '20px', fontFamily: 'sans-serif' }}>
+          <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '24px', maxWidth: '450px', width: '100%', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+            <div style={{ width: '60px', height: '60px', backgroundColor: '#fee2e2', color: '#ef4444', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>
+              ⚠️
+            </div>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>පද්ධතියේ Cache දෝෂයක් මඟහරවන ලදී</h2>
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>බ්‍රවුසරයේ පැවති පැරණි දත්ත ඉවත් කර යෙදුම නිවැරදිව ආරම්භ කිරීමට පහත බොත්තම ඔබන්න.</p>
             <button
               onClick={() => {
-                localStorage.clear();
+                try { localStorage.clear(); } catch(e) {}
                 window.location.reload();
               }}
-              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg hover:bg-[#6c2ee0] transition-all"
+              style={{ width: '100%', padding: '14px', backgroundColor: '#7a3aec', color: '#ffffff', fontWeight: 'bold', border: 'none', borderRadius: '14px', cursor: 'pointer', fontSize: '14px' }}
             >
-              Clear Cache & Reload App
+              Clear Cache & Open App
             </button>
           </div>
         </div>
@@ -33,7 +39,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// --- INLINE SVG ICONS (කිසි විටෙකත් කැඩී නොයන ස්ථිර Icons) ---
+// --- INLINE SVG ICONS (Icons කිසිදා කැඩී නොයන ලෙස සකසා ඇත) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -56,11 +62,17 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
   );
 };
 
-const COMPANY_LOGO = 'Compnay Logo.jpg';
-const CAR_IMG = 'Car.jpg';
-const LORRY_IMG = 'Lorry.jpg';
-const BIKE_IMG = 'Motocycle.png';
-const THREE_WHEELER_IMG = 'Three-wheeler.png';
+// Asset paths
+const getAssetUrl = (fileName) => {
+  const base = import.meta.env?.BASE_URL || './';
+  return `${base.endsWith('/') ? base : base + '/'}${fileName}`;
+};
+
+const COMPANY_LOGO = getAssetUrl('Compnay Logo.jpg');
+const CAR_IMG = getAssetUrl('Car.jpg');
+const LORRY_IMG = getAssetUrl('Lorry.jpg');
+const BIKE_IMG = getAssetUrl('Motocycle.png');
+const THREE_WHEELER_IMG = getAssetUrl('Three-wheeler.png');
 
 const INITIAL_SEIZERS = [
   { id: '1', name: 'Mr. K.A.P Indika', nic: '781032786v', phone: '0771234567' },
@@ -75,13 +87,15 @@ function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
-  // Safe LocalStorage Loader
+  // ආරක්ෂිත State Loaders (Crash නොවන අයුරින්)
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_main_clean_v8');
+      const saved = localStorage.getItem('wgYard_final_prod_v9');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.filter(item => item && typeof item === 'object');
+        }
       }
     } catch (e) {}
     return INITIAL_DATA;
@@ -89,10 +103,12 @@ function MainApp() {
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_main_clean_v8');
+      const saved = localStorage.getItem('wgSeizers_final_prod_v9');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.filter(item => item && typeof item === 'object');
+        }
       }
     } catch (e) {}
     return INITIAL_SEIZERS;
@@ -100,25 +116,27 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_main_clean_v8');
+      const saved = localStorage.getItem('wgYardFiles_final_prod_v9');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter(item => item && typeof item === 'object');
+        }
       }
     } catch (e) {}
     return [];
   });
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_main_clean_v8', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_final_prod_v9', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_main_clean_v8', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_final_prod_v9', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_main_clean_v8', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_final_prod_v9', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,12 +197,12 @@ function MainApp() {
     const newEntry = {
       id: Date.now().toString(),
       actionType: formData.actionType || 'Seized',
-      contractNo: formData.contractNo.trim().toUpperCase(),
-      vehicleNo: formData.vehicleNo.trim().toUpperCase(),
+      contractNo: String(formData.contractNo).trim().toUpperCase(),
+      vehicleNo: String(formData.vehicleNo).trim().toUpperCase(),
       clientName: formData.clientName || 'N/A',
       vehicleType: formData.vehicleType || 'Motorcycle',
       status: formData.orderStatus || 'ACTIVE',
-      trs: !!formData.trs,
+      trs: Boolean(formData.trs),
       seizerName: formData.seizerName || '',
       yardLocation: formData.yardLocation || 'Kurunegala Yard',
       offsiteBranch: formData.yardLocation === 'Offsite Yard' ? formData.offsiteBranch : '',
@@ -203,7 +221,7 @@ function MainApp() {
       ].filter(Boolean).join(', ')
     };
 
-    setData(prev => [newEntry, ...prev]);
+    setData(prev => [newEntry, ...(Array.isArray(prev) ? prev : [])]);
     setActiveTab('dashboard');
     setWizardStep(1);
     setFormData({
@@ -224,21 +242,22 @@ function MainApp() {
     }
     const newDispatch = {
       id: Date.now().toString(),
-      contractNo: yardDispatch.contractNo.trim().toUpperCase(),
-      vehicleNo: yardDispatch.vehicleNo.trim().toUpperCase(),
+      contractNo: String(yardDispatch.contractNo).trim().toUpperCase(),
+      vehicleNo: String(yardDispatch.vehicleNo).trim().toUpperCase(),
       toWhom: yardDispatch.toWhom,
       epfNo: yardDispatch.epfNo,
       sentDate: yardDispatch.sentDate,
       docs: [yardDispatch.sentMTA6 ? 'MTA6' : '', yardDispatch.sentIDCopy ? 'ID Copy' : ''].filter(Boolean).join(', ')
     };
-    setYardFiles(prev => [newDispatch, ...prev]);
+    setYardFiles(prev => [newDispatch, ...(Array.isArray(prev) ? prev : [])]);
     setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false });
     alert("ලිපිගොනු Yard එකට යැවීමේ සටහන සුරැකිණි!");
   };
 
   const exportToExcel = () => {
     let csvContent = "\uFEFFContract No,Vehicle No,Client Name,Type,Method,Yard/Branch,Status,TRS,Outstanding,Sold,Client Paid,Seizer Payment,Documents\n";
-    (data || []).forEach(row => {
+    const safeRows = Array.isArray(data) ? data.filter(Boolean) : [];
+    safeRows.forEach(row => {
       const yardInfo = row.yardLocation === 'Offsite Yard' ? `Offsite (${row.offsiteBranch || 'N/A'})` : (row.yardLocation || '');
       csvContent += `"${row.contractNo || ''}","${row.vehicleNo || ''}","${row.clientName || ''}","${row.vehicleType || ''}","${row.actionType || ''}","${yardInfo}","${row.status || ''}","${row.trs ? 'TRS' : 'NO'}","${row.outstanding || 0}","${row.isSold || 'No'}","${row.clientPaid || 'No'}","${row.seizerPaymentStatus || ''}","${row.docs || ''}"\n`;
     });
@@ -267,34 +286,33 @@ function MainApp() {
         const vlookupMap = {};
 
         lines.forEach((line) => {
-          if (!line.trim()) return;
-          // CSV Split (Quotes සහ Commas හැසිරවීම)
+          if (!line || !line.trim()) return;
           const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/(^"|"$)/g, '').trim());
 
-          // Excel Column C = Index 2 (CONTRACT_NO)
-          // Excel Column N = Index 13 (CAPITAL_OUTSTANDING)
+          // Column C (Index 2) = CONTRACT_NO
+          // Column N (Index 13) = CAPITAL_OUTSTANDING
           const contractNo = cols[2];
           const outstandingVal = cols[13];
 
           if (
             contractNo &&
-            contractNo.toUpperCase() !== 'CONTRACT_NO' &&
+            String(contractNo).toUpperCase() !== 'CONTRACT_NO' &&
             outstandingVal !== undefined &&
             outstandingVal !== ''
           ) {
-            const parsedNum = parseFloat(outstandingVal.replace(/,/g, ''));
+            const parsedNum = parseFloat(String(outstandingVal).replace(/,/g, ''));
             if (!isNaN(parsedNum)) {
-              vlookupMap[contractNo.toUpperCase()] = parsedNum;
+              vlookupMap[String(contractNo).trim().toUpperCase()] = parsedNum;
             }
           }
         });
 
         let updatedCount = 0;
 
-        // පද්ධතියේ දැනට පවතින දත්ත වලට VLOOKUP කර Outstanding Amount එක update කිරීම
         setData(prevData => {
-          return prevData.map(item => {
-            const contractKey = (item.contractNo || '').trim().toUpperCase();
+          const safeData = Array.isArray(prevData) ? prevData.filter(Boolean) : [];
+          return safeData.map(item => {
+            const contractKey = String(item.contractNo || '').trim().toUpperCase();
             if (vlookupMap[contractKey] !== undefined) {
               updatedCount++;
               return {
@@ -307,12 +325,12 @@ function MainApp() {
         });
 
         if (updatedCount > 0) {
-          alert(`Excel VLOOKUP සාර්ථකයි!\nගිවිසුම් (Contract Numbers) ${updatedCount} ක Outstanding Amount එක සාර්ථකව Update කරන ලදී.`);
+          alert(`Excel VLOOKUP සාර්ථකයි!\nගිවිසුම් ${updatedCount} ක Outstanding Amount එක සාර්ථකව Update කරන ලදී.`);
         } else {
-          alert("Excel ගොනුවේ ඇති Contract Numbers (Column C) සමඟ ගැළපෙන ගිවිසුම් පද්ධතිය තුළ හමු නොවීය. කරුණාකර Column C හි Contract No පරීක්ෂා කරන්න.");
+          alert("Excel ගොනුවේ Column C හි ඇති Contract Numbers සමඟ ගැළපෙන කිසිදු ගිවිසුමක් පද්ධතියේ හමු නොවීය.");
         }
       } catch (err) {
-        alert("ගොනුව කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV / Excel ගොනුවක් ලබා දෙන්න.");
+        alert("ගොනුව කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV ගොනුවක් ලබා දෙන්න.");
       }
     };
     reader.readAsText(file);
@@ -329,17 +347,24 @@ function MainApp() {
     }
   };
 
-  // Safe search filtering
-  const filteredData = (data || []).filter(item => {
-    const term = (searchTerm || '').toLowerCase();
-    const cNo = (item?.contractNo || '').toLowerCase();
-    const vNo = (item?.vehicleNo || '').toLowerCase();
-    const cName = (item?.clientName || '').toLowerCase();
+  // Safe records array
+  const safeData = Array.isArray(data) ? data.filter(Boolean) : INITIAL_DATA;
+  const safeSeizers = Array.isArray(seizers) ? seizers.filter(Boolean) : INITIAL_SEIZERS;
+  const safeYardFiles = Array.isArray(yardFiles) ? yardFiles.filter(Boolean) : [];
+
+  // Safe search filtering (String() check ensures no crash if value is a number)
+  const filteredData = safeData.filter(item => {
+    if (!item) return false;
+    const term = String(searchTerm || '').trim().toLowerCase();
+    if (!term) return true;
+    const cNo = String(item.contractNo || '').toLowerCase();
+    const vNo = String(item.vehicleNo || '').toLowerCase();
+    const cName = String(item.clientName || '').toLowerCase();
     return cNo.includes(term) || vNo.includes(term) || cName.includes(term);
   });
 
   return (
-    <div className="flex h-screen bg-[#f4f7fb] text-slate-800 font-sans">
+    <div style={{ minHeight: '100vh', display: 'flex', backgroundColor: '#f4f7fb' }} className="text-slate-800 font-sans">
       
       {/* Sidebar with Commercial Credit Logo next to App Title */}
       <aside className="w-72 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
@@ -433,19 +458,19 @@ function MainApp() {
               <div className="grid grid-cols-4 gap-6">
                 <div className="bg-[#7a3aec] p-6 rounded-3xl text-white shadow-lg">
                   <span className="text-sm font-semibold opacity-80">Motorcycles</span>
-                  <h3 className="text-4xl font-black mt-2">{data.filter(d => d.vehicleType === 'Motorcycle').length}</h3>
+                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Motorcycle').length}</h3>
                 </div>
                 <div className="bg-[#f59e0b] p-6 rounded-3xl text-white shadow-lg">
                   <span className="text-sm font-semibold opacity-80">Three-Wheelers</span>
-                  <h3 className="text-4xl font-black mt-2">{data.filter(d => d.vehicleType === 'Three-wheeler').length}</h3>
+                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Three-wheeler').length}</h3>
                 </div>
                 <div className="bg-[#0ea5e9] p-6 rounded-3xl text-white shadow-lg">
                   <span className="text-sm font-semibold opacity-80">Cars</span>
-                  <h3 className="text-4xl font-black mt-2">{data.filter(d => d.vehicleType === 'Car').length}</h3>
+                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Car').length}</h3>
                 </div>
                 <div className="bg-[#10b981] p-6 rounded-3xl text-white shadow-lg">
                   <span className="text-sm font-semibold opacity-80">Lorries</span>
-                  <h3 className="text-4xl font-black mt-2">{data.filter(d => d.vehicleType === 'Lorry').length}</h3>
+                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Lorry').length}</h3>
                 </div>
               </div>
 
@@ -476,39 +501,41 @@ function MainApp() {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredData.map(row => (
-                        <tr key={row.id} className="hover:bg-slate-50">
-                          <td className="p-4 font-mono font-bold text-[#7a3aec]">{row.contractNo}</td>
-                          <td className="p-4 font-bold text-slate-700">{row.vehicleNo}</td>
-                          <td className="p-4 text-slate-600">{row.clientName}</td>
+                        <tr key={row?.id || Math.random()} className="hover:bg-slate-50">
+                          <td className="p-4 font-mono font-bold text-[#7a3aec]">{String(row?.contractNo || '')}</td>
+                          <td className="p-4 font-bold text-slate-700">{String(row?.vehicleNo || '')}</td>
+                          <td className="p-4 text-slate-600">{String(row?.clientName || '')}</td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <img src={getVehicleImage(row.vehicleType)} alt={row.vehicleType} className="w-10 h-7 object-cover rounded shadow-sm border" onError={(e) => { e.target.style.display = 'none'; }} />
-                              <span className="font-semibold">{row.vehicleType}</span>
+                              <img src={getVehicleImage(row?.vehicleType)} alt="" className="w-10 h-7 object-cover rounded shadow-sm border" onError={(e) => { e.target.style.display = 'none'; }} />
+                              <span className="font-semibold">{String(row?.vehicleType || '')}</span>
                             </div>
                           </td>
                           <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.actionType === 'Seized' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                              {row.actionType}
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row?.actionType === 'Seized' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                              {String(row?.actionType || 'Seized')}
                             </span>
                           </td>
                           <td className="p-4 text-slate-600 font-medium">
-                            {row.yardLocation === 'Offsite Yard' ? `Offsite - ${row.offsiteBranch || 'Branch'}` : row.yardLocation}
+                            {row?.yardLocation === 'Offsite Yard' ? `Offsite - ${row?.offsiteBranch || 'Branch'}` : String(row?.yardLocation || '')}
                           </td>
-                          <td className="p-4 font-mono font-semibold text-blue-600">Rs. {Number(row.outstanding || 0).toLocaleString()}</td>
+                          <td className="p-4 font-mono font-semibold text-blue-600">
+                            Rs. {parseFloat(String(row?.outstanding || '0').replace(/,/g, '')).toLocaleString()}
+                          </td>
                           <td className="p-4">
-                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${row.clientPaid === 'Yes' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                              {row.clientPaid || 'No'}
+                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${row?.clientPaid === 'Yes' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                              {String(row?.clientPaid || 'No')}
                             </span>
                           </td>
                           <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.seizerPaymentStatus === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'}`}>
-                              {row.seizerPaymentStatus || 'Pending'}
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row?.seizerPaymentStatus === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'}`}>
+                              {String(row?.seizerPaymentStatus || 'Pending')}
                             </span>
                           </td>
-                          <td className="p-4 text-xs text-slate-400">{row.docs || '-'}</td>
+                          <td className="p-4 text-xs text-slate-400">{String(row?.docs || '-')}</td>
                           {isAdmin && (
                             <td className="p-4 text-center">
-                              <button onClick={() => setData(prev => prev.filter(d => d.id !== row.id))} className="text-rose-500 hover:text-rose-700">
+                              <button onClick={() => setData(prev => prev.filter(d => d?.id !== row?.id))} className="text-rose-500 hover:text-rose-700">
                                 <Icon name="trash" className="w-4 h-4" />
                               </button>
                             </td>
@@ -517,6 +544,9 @@ function MainApp() {
                       ))}
                     </tbody>
                   </table>
+                  {filteredData.length === 0 && (
+                    <div className="p-8 text-center text-slate-400 text-sm">කිසිදු දත්තයක් හමු නොවීය.</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -569,7 +599,7 @@ function MainApp() {
                       <label className="text-xs font-bold text-slate-500 uppercase">Seizer</label>
                       <select name="seizerName" value={formData.seizerName} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold">
                         <option value="">Select Seizer</option>
-                        {seizers.map(s => <option key={s.id} value={s.name}>{s.name} ({s.nic})</option>)}
+                        {safeSeizers.map(s => <option key={s.id} value={s.name}>{s.name} ({s.nic})</option>)}
                       </select>
                     </div>
                   </div>
@@ -625,7 +655,7 @@ function MainApp() {
                         const [key, label] = item.split(':');
                         return (
                           <label key={key} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border cursor-pointer">
-                            <input type="checkbox" name={key} checked={formData[key]} onChange={handleFormChange} className="w-4 h-4 accent-[#7a3aec]" />
+                            <input type="checkbox" name={key} checked={Boolean(formData[key])} onChange={handleFormChange} className="w-4 h-4 accent-[#7a3aec]" />
                             <span className="text-sm font-semibold">{label}</span>
                           </label>
                         );
@@ -662,7 +692,7 @@ function MainApp() {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">EPF No (EPF අංකය) *</label>
-                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="EPF අංකය" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
+                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="Receiver EPF No" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Date Sent *</label>
@@ -670,11 +700,11 @@ function MainApp() {
                   </div>
                   <div className="flex gap-4 pt-2">
                     <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={yardDispatch.sentMTA6} onChange={e => setYardDispatch({...yardDispatch, sentMTA6: e.target.checked})} className="w-4 h-4 accent-[#7a3aec]" />
+                      <input type="checkbox" checked={Boolean(yardDispatch.sentMTA6)} onChange={e => setYardDispatch({...yardDispatch, sentMTA6: e.target.checked})} className="w-4 h-4 accent-[#7a3aec]" />
                       <span className="text-sm font-bold">MTA 6</span>
                     </label>
                     <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={yardDispatch.sentIDCopy} onChange={e => setYardDispatch({...yardDispatch, sentIDCopy: e.target.checked})} className="w-4 h-4 accent-[#7a3aec]" />
+                      <input type="checkbox" checked={Boolean(yardDispatch.sentIDCopy)} onChange={e => setYardDispatch({...yardDispatch, sentIDCopy: e.target.checked})} className="w-4 h-4 accent-[#7a3aec]" />
                       <span className="text-sm font-bold">ID Copy</span>
                     </label>
                   </div>
@@ -685,12 +715,12 @@ function MainApp() {
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Dispatch History</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
-                  {yardFiles.length === 0 ? <p className="text-slate-400 text-sm">තවම වාර්තා නැත.</p> : yardFiles.map(f => (
-                    <div key={f.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
+                  {safeYardFiles.length === 0 ? <p className="text-slate-400 text-sm">තවම වාර්තා නැත.</p> : safeYardFiles.map(f => (
+                    <div key={f?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
                       <div>
-                        <div className="font-bold text-blue-700">{f.contractNo} - {f.vehicleNo}</div>
-                        <div className="text-xs text-slate-600">To: <strong>{f.toWhom}</strong> (EPF: {f.epfNo})</div>
-                        <div className="text-[10px] text-slate-400">{f.sentDate} | {f.docs}</div>
+                        <div className="font-bold text-blue-700">{String(f?.contractNo || '')} - {String(f?.vehicleNo || '')}</div>
+                        <div className="text-xs text-slate-600">To: <strong>{String(f?.toWhom || '')}</strong> (EPF: {String(f?.epfNo || '')})</div>
+                        <div className="text-[10px] text-slate-400">{String(f?.sentDate || '')} | {String(f?.docs || '')}</div>
                       </div>
                       <Icon name="check" className="w-5 h-5 text-emerald-500" />
                     </div>
@@ -725,11 +755,11 @@ function MainApp() {
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Registered Seizers</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
-                  {seizers.map(s => (
-                    <div key={s.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
+                  {safeSeizers.map(s => (
+                    <div key={s?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
                       <div>
-                        <div className="font-bold text-slate-800">{s.name}</div>
-                        <div className="text-xs font-mono text-slate-500">NIC: {s.nic} | Tel: {s.phone || 'N/A'}</div>
+                        <div className="font-bold text-slate-800">{String(s?.name || '')}</div>
+                        <div className="text-xs font-mono text-slate-500">NIC: {String(s?.nic || '')} | Tel: {String(s?.phone || 'N/A')}</div>
                       </div>
                       <span className="text-xs font-bold bg-purple-100 text-[#7a3aec] px-2.5 py-1 rounded-full">Active</span>
                     </div>
@@ -749,7 +779,7 @@ function MainApp() {
                 <button 
                   onClick={() => {
                     if (window.confirm("ඔබට සම්පූර්ණ දත්ත මකා දමා පද්ධතිය Reset කිරීමට අවශ්‍යද?")) {
-                      localStorage.clear();
+                      try { localStorage.clear(); } catch(e) {}
                       setData(INITIAL_DATA);
                       setYardFiles([]);
                       alert("පද්ධතියේ සියලු දත්ත සාර්ථකව Reset විය.");
