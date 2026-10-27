@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// --- INLINE SVG ICONS ---
+// --- INLINE SVG ICONS (Icons කිසි විටෙකත් කැඩී නොයයි) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -13,9 +13,7 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
     upload: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />,
     trash: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />,
     lock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />,
-    user: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />,
     check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />,
-    alert: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />,
     fileText: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
   };
 
@@ -45,31 +43,43 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
+  // Safe LocalStorage Loader (කවදාවත් Crash නොවීමට)
   const [data, setData] = useState(() => {
-    const saved = localStorage.getItem('wgYardData_v5');
-    return saved ? JSON.parse(saved) : INITIAL_DATA;
+    try {
+      const saved = localStorage.getItem('wgYardData_v6');
+      return saved ? JSON.parse(saved) : INITIAL_DATA;
+    } catch (e) {
+      return INITIAL_DATA;
+    }
   });
 
   const [seizers, setSeizers] = useState(() => {
-    const saved = localStorage.getItem('wgSeizersData_v5');
-    return saved ? JSON.parse(saved) : INITIAL_SEIZERS;
+    try {
+      const saved = localStorage.getItem('wgSeizersData_v6');
+      return saved ? JSON.parse(saved) : INITIAL_SEIZERS;
+    } catch (e) {
+      return INITIAL_SEIZERS;
+    }
   });
 
   const [yardFiles, setYardFiles] = useState(() => {
-    const saved = localStorage.getItem('wgYardFiles_v5');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('wgYardFiles_v6');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
 
-  useEffect(() => { localStorage.setItem('wgYardData_v5', JSON.stringify(data)); }, [data]);
-  useEffect(() => { localStorage.setItem('wgSeizersData_v5', JSON.stringify(seizers)); }, [seizers]);
-  useEffect(() => { localStorage.setItem('wgYardFiles_v5', JSON.stringify(yardFiles)); }, [yardFiles]);
+  useEffect(() => { localStorage.setItem('wgYardData_v6', JSON.stringify(data)); }, [data]);
+  useEffect(() => { localStorage.setItem('wgSeizersData_v6', JSON.stringify(seizers)); }, [seizers]);
+  useEffect(() => { localStorage.setItem('wgYardFiles_v6', JSON.stringify(yardFiles)); }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [loginCreds, setLoginCreds] = useState({ user: '', pass: '' });
 
-  // Wizard Form State
   const [wizardStep, setWizardStep] = useState(1);
   const [formData, setFormData] = useState({
     actionType: 'Seized',
@@ -94,7 +104,7 @@ export default function App() {
       setShowLogin(false);
       setLoginCreds({ user: '', pass: '' });
     } else {
-      alert("Invalid Admin Credentials!");
+      alert("වලංගු නොවන Admin තොරතුරු!");
     }
   };
 
@@ -106,18 +116,18 @@ export default function App() {
   const submitNewSeizer = (e) => {
     e.preventDefault();
     if (!newSeizer.name || !newSeizer.nic) {
-      alert("Please enter Seizer Name and NIC.");
+      alert("කරුණාකර Seizer ගේ නම සහ ID අංකය ඇතුළත් කරන්න.");
       return;
     }
     const added = { id: Date.now().toString(), ...newSeizer };
     setSeizers([...seizers, added]);
     setNewSeizer({ name: '', nic: '', phone: '' });
-    alert("New Seizer added successfully!");
+    alert("අලුත් Seizer සාර්ථකව පද්ධතියට එක් කරන ලදී!");
   };
 
   const submitForm = () => {
     if (!formData.contractNo || !formData.vehicleNo) {
-      alert("Contract No and Vehicle No are required.");
+      alert("Contract No සහ Vehicle No අනිවාර්යයෙන්ම ඇතුළත් කළ යුතුය.");
       return;
     }
     const newEntry = {
@@ -150,13 +160,20 @@ export default function App() {
     setData([newEntry, ...data]);
     setActiveTab('dashboard');
     setWizardStep(1);
-    alert("Record successfully saved!");
+    setFormData({
+      actionType: 'Seized', contractNo: '', trs: false, clientName: '', vehicleNo: '', vehicleType: 'Motorcycle',
+      seizerName: '', seizerID: '', orderStatus: 'ACTIVE', seizedDate: '', yardLocation: 'Kurunegala Yard', offsiteBranch: '',
+      outstanding: '', seizerFee: '', isSold: 'No', soldAmount: '', currentBalance: '',
+      clientPaid: 'No', seizerPaymentStatus: 'Pending', specialApproval: false,
+      docsMTA6: false, docsID: false, docsHForm: false, docsLetter: false, remarks: ''
+    });
+    alert("දත්ත සාර්ථකව ඇතුළත් කරන ලදී!");
   };
 
   const submitYardDispatch = (e) => {
     e.preventDefault();
     if (!yardDispatch.contractNo || !yardDispatch.vehicleNo || !yardDispatch.toWhom || !yardDispatch.epfNo) {
-      alert("Please fill all required fields.");
+      alert("කරුණාකර සියලුම තොරතුරු සම්පූර්ණ කරන්න.");
       return;
     }
     const newDispatch = {
@@ -166,14 +183,14 @@ export default function App() {
     };
     setYardFiles([newDispatch, ...yardFiles]);
     setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false });
-    alert("Yard file dispatch recorded!");
+    alert("ලිපිගොනු Yard එකට යැවීමේ සටහන සුරැකිණි!");
   };
 
   const exportToExcel = () => {
     let csvContent = "\uFEFFContract No,Vehicle No,Client Name,Type,Method,Yard/Branch,Status,TRS,Outstanding,Sold,Client Paid,Seizer Payment,Documents\n";
     data.forEach(row => {
       const yardInfo = row.yardLocation === 'Offsite Yard' ? `Offsite (${row.offsiteBranch || 'N/A'})` : row.yardLocation;
-      csvContent += `"${row.contractNo}","${row.vehicleNo}","${row.clientName}","${row.vehicleType}","${row.actionType}","${yardInfo}","${row.status}","${row.trs ? 'TRS' : 'NO'}","${row.outstanding}","${row.isSold}","${row.clientPaid}","${row.seizerPaymentStatus}","${row.docs}"\n`;
+      csvContent += `"${row.contractNo || ''}","${row.vehicleNo || ''}","${row.clientName || ''}","${row.vehicleType || ''}","${row.actionType || ''}","${yardInfo}","${row.status || ''}","${row.trs ? 'TRS' : 'NO'}","${row.outstanding || 0}","${row.isSold || 'No'}","${row.clientPaid || 'No'}","${row.seizerPaymentStatus || ''}","${row.docs || ''}"\n`;
     });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -218,7 +235,7 @@ export default function App() {
       }
       if (imported.length > 0) {
         setData([...imported, ...data]);
-        alert(`${imported.length} records imported successfully!`);
+        alert(`${imported.length} ක් වන දත්ත සාර්ථකව Import කරන ලදී!`);
       }
     };
     reader.readAsText(file);
@@ -234,24 +251,26 @@ export default function App() {
     }
   };
 
-  const filteredData = data.filter(item =>
-    item.contractNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.vehicleNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.clientName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Safe search filter (null/undefined values වලදී crash නොවීමට)
+  const filteredData = data.filter(item => {
+    const term = (searchTerm || '').toLowerCase();
+    const cNo = (item?.contractNo || '').toLowerCase();
+    const vNo = (item?.vehicleNo || '').toLowerCase();
+    const cName = (item?.clientName || '').toLowerCase();
+    return cNo.includes(term) || vNo.includes(term) || cName.includes(term);
+  });
 
   return (
     <div className="flex h-screen bg-[#f4f7fb] text-slate-800 font-sans">
       
       {/* Sidebar with Company Logo next to App Title */}
-      <aside className="w-68 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
+      <aside className="w-72 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
         <div>
-          {/* Logo & Title Header */}
           <div className="h-28 flex items-center justify-center border-b border-white/10 mx-4 px-2">
             <div className="flex items-center gap-3 bg-white/10 p-2.5 rounded-2xl w-full shadow-inner">
               <img 
                 src={COMPANY_LOGO} 
-                alt="Company Logo" 
+                alt="Logo" 
                 className="h-10 w-12 object-contain bg-white rounded-xl p-1 shadow-md"
                 onError={(e) => { e.target.style.display = 'none'; }}
               />
@@ -286,7 +305,7 @@ export default function App() {
         <div className="p-6">
           {isAdmin ? (
             <div className="bg-white/10 p-4 rounded-2xl border border-white/20">
-              <span className="text-xs font-bold block">Admin Access</span>
+              <span className="text-xs font-bold block">Admin Access Active</span>
               <button onClick={() => setIsAdmin(false)} className="w-full mt-2 py-2 text-xs font-bold bg-rose-500 rounded-xl hover:bg-rose-600 transition-all">Logout</button>
             </div>
           ) : (
@@ -393,15 +412,15 @@ export default function App() {
                           <td className="p-4 text-slate-600 font-medium">
                             {row.yardLocation === 'Offsite Yard' ? `Offsite - ${row.offsiteBranch || 'Branch'}` : row.yardLocation}
                           </td>
-                          <td className="p-4 font-mono font-semibold">Rs. {Number(row.outstanding).toLocaleString()}</td>
+                          <td className="p-4 font-mono font-semibold">Rs. {Number(row.outstanding || 0).toLocaleString()}</td>
                           <td className="p-4">
                             <span className={`px-2 py-0.5 rounded text-xs font-bold ${row.clientPaid === 'Yes' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                              {row.clientPaid}
+                              {row.clientPaid || 'No'}
                             </span>
                           </td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.seizerPaymentStatus === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'}`}>
-                              {row.seizerPaymentStatus}
+                              {row.seizerPaymentStatus || 'Pending'}
                             </span>
                           </td>
                           <td className="p-4 text-xs text-slate-400">{row.docs || '-'}</td>
@@ -473,7 +492,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Yard Locations Requirement */}
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 mt-4">
                     <label className="text-xs font-bold text-slate-600 uppercase block mb-1">Yard Location *</label>
                     <select name="yardLocation" value={formData.yardLocation} onChange={handleFormChange} className="w-full bg-white border p-3 rounded-xl font-bold text-slate-800">
@@ -483,7 +501,7 @@ export default function App() {
                     </select>
 
                     {formData.yardLocation === 'Offsite Yard' && (
-                      <div className="mt-3 animate-in fade-in">
+                      <div className="mt-3">
                         <label className="text-xs font-bold text-blue-600 uppercase block mb-1">Offsite Branch Name *</label>
                         <input type="text" name="offsiteBranch" value={formData.offsiteBranch} onChange={handleFormChange} placeholder="e.g. Kandy Branch, Galle Branch" className="w-full bg-white border border-blue-400 p-3 rounded-xl font-semibold" />
                       </div>
@@ -535,7 +553,7 @@ export default function App() {
 
                   <div className="flex gap-4 pt-6">
                     <button onClick={() => setWizardStep(1)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Back</button>
-                    <button onClick={submitForm} className="flex-2 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">Save Entry</button>
+                    <button onClick={submitForm} className="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">Save Entry</button>
                   </div>
                 </div>
               )}
@@ -557,12 +575,12 @@ export default function App() {
                     <input type="text" value={yardDispatch.vehicleNo} onChange={e => setYardDispatch({...yardDispatch, vehicleNo: e.target.value})} placeholder="e.g. SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom *</label>
-                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="Receiver Name" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
+                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom (භාරදුන් අයගේ නම) *</label>
+                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="නම ඇතුළත් කරන්න" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">EPF No *</label>
-                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="Receiver EPF No" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
+                    <label className="text-xs font-bold text-slate-500 uppercase">EPF No (EPF අංකය) *</label>
+                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="EPF අංකය" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Date Sent *</label>
@@ -586,7 +604,7 @@ export default function App() {
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Dispatch History</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
-                  {yardFiles.length === 0 ? <p className="text-slate-400 text-sm">No dispatches recorded yet.</p> : yardFiles.map(f => (
+                  {yardFiles.length === 0 ? <p className="text-slate-400 text-sm">තවම වාර්තා නැත.</p> : yardFiles.map(f => (
                     <div key={f.id} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
                       <div>
                         <div className="font-bold text-blue-700">{f.contractNo} - {f.vehicleNo}</div>
@@ -646,14 +664,14 @@ export default function App() {
               <h2 className="text-2xl font-bold mb-4 text-slate-800">System Reset & Danger Zone</h2>
               <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl">
                 <h3 className="text-lg font-bold text-rose-700">Clear All System Data</h3>
-                <p className="text-sm text-rose-600 mt-1 mb-4">This will permanently delete all journal entries and records from local storage.</p>
+                <p className="text-sm text-rose-600 mt-1 mb-4">පද්ධතියේ ඇති සියලුම Journal Entries, Seizer Records සහ Yard Dispatches සම්පූර්ණයෙන්ම මැකී යයි.</p>
                 <button 
                   onClick={() => {
-                    if (window.confirm("Are you sure you want to reset all data?")) {
+                    if (window.confirm("ඔබට සම්පූර්ණ දත්ත මකා දමා පද්ධතිය Reset කිරීමට අවශ්‍යද?")) {
                       localStorage.clear();
                       setData([]);
                       setYardFiles([]);
-                      alert("All data reset successfully!");
+                      alert("පද්ධතියේ සියලු දත්ත සාර්ථකව Reset විය.");
                     }
                   }} 
                   className="px-6 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-md hover:bg-rose-700"
