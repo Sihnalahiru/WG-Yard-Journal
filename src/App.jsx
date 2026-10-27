@@ -1,6 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- INLINE SVG ICONS (Icons කිසි විටෙකත් කැඩී නොයයි) ---
+// --- ERROR BOUNDARY (White Screen සම්පූර්ණයෙන්ම වළක්වයි) ---
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 text-center">
+          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">පරණ Cache දත්ත ඉවත් කිරීම</h2>
+            <p className="text-sm text-slate-500 mb-6">පරණ දත්ත නිසා ඇතිවූ ගැටලුවකි. පහත බොත්තම ඔබා Reset කරන්න.</p>
+            <button
+              onClick={() => {
+                localStorage.clear();
+                window.location.reload();
+              }}
+              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg"
+            >
+              Clear Cache & Open App
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// --- INLINE SVG ICONS ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -13,13 +46,12 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
     upload: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />,
     trash: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />,
     lock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />,
-    check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />,
-    fileText: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
   };
 
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      {icons[name] || icons.fileText}
+      {icons[name] || icons.dashboard}
     </svg>
   );
 };
@@ -39,41 +71,55 @@ const INITIAL_DATA = [
   { id: '1', contractNo: 'WGFBA055203', vehicleNo: 'SP-BJK-1182', clientName: 'Saman Kumara', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'ACTIVE', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '450000', seizerFee: '25000', isSold: 'No', soldAmount: '0', currentBalance: '450000', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6' }
 ];
 
-export default function App() {
+function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
-  // Safe LocalStorage Loader (කවදාවත් Crash නොවීමට)
+  // Safe LocalStorage Loader
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardData_v6');
-      return saved ? JSON.parse(saved) : INITIAL_DATA;
-    } catch (e) {
-      return INITIAL_DATA;
-    }
+      const saved = localStorage.getItem('wgYard_clean_v7');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_DATA;
   });
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizersData_v6');
-      return saved ? JSON.parse(saved) : INITIAL_SEIZERS;
-    } catch (e) {
-      return INITIAL_SEIZERS;
-    }
+      const saved = localStorage.getItem('wgSeizers_clean_v7');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return INITIAL_SEIZERS;
   });
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_v6');
-      return saved ? JSON.parse(saved) : [];
-    } catch (e) {
-      return [];
-    }
+      const saved = localStorage.getItem('wgYardFiles_clean_v7');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
   });
 
-  useEffect(() => { localStorage.setItem('wgYardData_v6', JSON.stringify(data)); }, [data]);
-  useEffect(() => { localStorage.setItem('wgSeizersData_v6', JSON.stringify(seizers)); }, [seizers]);
-  useEffect(() => { localStorage.setItem('wgYardFiles_v6', JSON.stringify(yardFiles)); }, [yardFiles]);
+  useEffect(() => {
+    try { localStorage.setItem('wgYard_clean_v7', JSON.stringify(data)); } catch (e) {}
+  }, [data]);
+
+  useEffect(() => {
+    try { localStorage.setItem('wgSeizers_clean_v7', JSON.stringify(seizers)); } catch (e) {}
+  }, [seizers]);
+
+  useEffect(() => {
+    try { localStorage.setItem('wgYardFiles_clean_v7', JSON.stringify(yardFiles)); } catch (e) {}
+  }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -120,7 +166,7 @@ export default function App() {
       return;
     }
     const added = { id: Date.now().toString(), ...newSeizer };
-    setSeizers([...seizers, added]);
+    setSeizers(prev => [...prev, added]);
     setNewSeizer({ name: '', nic: '', phone: '' });
     alert("අලුත් Seizer සාර්ථකව පද්ධතියට එක් කරන ලදී!");
   };
@@ -132,23 +178,23 @@ export default function App() {
     }
     const newEntry = {
       id: Date.now().toString(),
-      actionType: formData.actionType,
+      actionType: formData.actionType || 'Seized',
       contractNo: formData.contractNo,
       vehicleNo: formData.vehicleNo,
       clientName: formData.clientName || 'N/A',
-      vehicleType: formData.vehicleType,
-      status: formData.orderStatus,
-      trs: formData.trs,
-      seizerName: formData.seizerName,
-      yardLocation: formData.yardLocation,
+      vehicleType: formData.vehicleType || 'Motorcycle',
+      status: formData.orderStatus || 'ACTIVE',
+      trs: !!formData.trs,
+      seizerName: formData.seizerName || '',
+      yardLocation: formData.yardLocation || 'Kurunegala Yard',
       offsiteBranch: formData.yardLocation === 'Offsite Yard' ? formData.offsiteBranch : '',
       outstanding: formData.outstanding || '0',
       seizerFee: formData.seizerFee || '0',
-      isSold: formData.isSold,
+      isSold: formData.isSold || 'No',
       soldAmount: formData.soldAmount || '0',
       currentBalance: formData.currentBalance || '0',
-      clientPaid: formData.clientPaid,
-      seizerPaymentStatus: formData.seizerPaymentStatus,
+      clientPaid: formData.clientPaid || 'No',
+      seizerPaymentStatus: formData.seizerPaymentStatus || 'Pending',
       docs: [
         formData.docsMTA6 ? 'MTA6' : '',
         formData.docsID ? 'ID Copy' : '',
@@ -157,7 +203,7 @@ export default function App() {
       ].filter(Boolean).join(', ')
     };
 
-    setData([newEntry, ...data]);
+    setData(prev => [newEntry, ...prev]);
     setActiveTab('dashboard');
     setWizardStep(1);
     setFormData({
@@ -181,61 +227,65 @@ export default function App() {
       ...yardDispatch,
       docs: [yardDispatch.sentMTA6 ? 'MTA6' : '', yardDispatch.sentIDCopy ? 'ID Copy' : ''].filter(Boolean).join(', ')
     };
-    setYardFiles([newDispatch, ...yardFiles]);
+    setYardFiles(prev => [newDispatch, ...prev]);
     setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false });
     alert("ලිපිගොනු Yard එකට යැවීමේ සටහන සුරැකිණි!");
   };
 
   const exportToExcel = () => {
     let csvContent = "\uFEFFContract No,Vehicle No,Client Name,Type,Method,Yard/Branch,Status,TRS,Outstanding,Sold,Client Paid,Seizer Payment,Documents\n";
-    data.forEach(row => {
-      const yardInfo = row.yardLocation === 'Offsite Yard' ? `Offsite (${row.offsiteBranch || 'N/A'})` : row.yardLocation;
+    (data || []).forEach(row => {
+      const yardInfo = row.yardLocation === 'Offsite Yard' ? `Offsite (${row.offsiteBranch || 'N/A'})` : (row.yardLocation || '');
       csvContent += `"${row.contractNo || ''}","${row.vehicleNo || ''}","${row.clientName || ''}","${row.vehicleType || ''}","${row.actionType || ''}","${yardInfo}","${row.status || ''}","${row.trs ? 'TRS' : 'NO'}","${row.outstanding || 0}","${row.isSold || 'No'}","${row.clientPaid || 'No'}","${row.seizerPaymentStatus || ''}","${row.docs || ''}"\n`;
     });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `WG_Yard_Journal_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.href = url;
+    link.download = `WG_Yard_Journal_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const text = evt.target.result;
-      const lines = text.split('\n');
-      const imported = [];
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const cols = lines[i].split(',').map(s => s.replace(/(^"|"$)/g, '').trim());
-        if (cols[0] && cols[1]) {
-          imported.push({
-            id: Date.now().toString() + i,
-            contractNo: cols[0] || 'WGFBA055203',
-            vehicleNo: cols[1] || 'SP-XXX-0000',
-            clientName: cols[2] || 'Imported Client',
-            vehicleType: cols[3] || 'Motorcycle',
-            actionType: cols[4] || 'Seized',
-            yardLocation: cols[5] || 'Kurunegala Yard',
-            offsiteBranch: '',
-            status: cols[6] || 'ACTIVE',
-            trs: cols[7] === 'TRS',
-            outstanding: cols[8] || '0',
-            isSold: cols[9] || 'No',
-            clientPaid: cols[10] || 'No',
-            seizerPaymentStatus: cols[11] || 'Pending',
-            docs: cols[12] || ''
-          });
+      try {
+        const text = evt.target.result;
+        const lines = text.split('\n');
+        const imported = [];
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          const cols = lines[i].split(',').map(s => s.replace(/(^"|"$)/g, '').trim());
+          if (cols[0] && cols[1]) {
+            imported.push({
+              id: Date.now().toString() + i,
+              contractNo: cols[0] || 'WGFBA055203',
+              vehicleNo: cols[1] || 'SP-XXX-0000',
+              clientName: cols[2] || 'Imported Client',
+              vehicleType: cols[3] || 'Motorcycle',
+              actionType: cols[4] || 'Seized',
+              yardLocation: cols[5] || 'Kurunegala Yard',
+              offsiteBranch: '',
+              status: cols[6] || 'ACTIVE',
+              trs: cols[7] === 'TRS',
+              outstanding: cols[8] || '0',
+              isSold: cols[9] || 'No',
+              clientPaid: cols[10] || 'No',
+              seizerPaymentStatus: cols[11] || 'Pending',
+              docs: cols[12] || ''
+            });
+          }
         }
-      }
-      if (imported.length > 0) {
-        setData([...imported, ...data]);
-        alert(`${imported.length} ක් වන දත්ත සාර්ථකව Import කරන ලදී!`);
+        if (imported.length > 0) {
+          setData(prev => [...imported, ...prev]);
+          alert(`${imported.length} ක් වන දත්ත සාර්ථකව Import කරන ලදී!`);
+        }
+      } catch (err) {
+        alert("File එක කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV ගොනුවක් ලබාදෙන්න.");
       }
     };
     reader.readAsText(file);
@@ -251,8 +301,7 @@ export default function App() {
     }
   };
 
-  // Safe search filter (null/undefined values වලදී crash නොවීමට)
-  const filteredData = data.filter(item => {
+  const filteredData = (data || []).filter(item => {
     const term = (searchTerm || '').toLowerCase();
     const cNo = (item?.contractNo || '').toLowerCase();
     const vNo = (item?.vehicleNo || '').toLowerCase();
@@ -333,7 +382,7 @@ export default function App() {
           </div>
           <div className="flex items-center gap-4">
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="hidden" />
-            <button onClick={() => fileInputRef.current.click()} className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 shadow-sm rounded-full text-xs font-bold hover:shadow-md transition-all">
+            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 shadow-sm rounded-full text-xs font-bold hover:shadow-md transition-all">
               <Icon name="upload" className="w-4 h-4 text-emerald-600" /> IMPORT CSV/EXCEL
             </button>
             <button onClick={exportToExcel} className="flex items-center gap-2 px-5 py-2.5 bg-[#7a3aec] text-white shadow-md rounded-full text-xs font-bold hover:bg-[#6c2ee0] transition-all">
@@ -400,7 +449,7 @@ export default function App() {
                           <td className="p-4 text-slate-600">{row.clientName}</td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
-                              <img src={getVehicleImage(row.vehicleType)} alt={row.vehicleType} className="w-10 h-7 object-cover rounded shadow-sm border" />
+                              <img src={getVehicleImage(row.vehicleType)} alt={row.vehicleType} className="w-10 h-7 object-cover rounded shadow-sm border" onError={(e) => { e.target.style.display = 'none'; }} />
                               <span className="font-semibold">{row.vehicleType}</span>
                             </div>
                           </td>
@@ -426,7 +475,7 @@ export default function App() {
                           <td className="p-4 text-xs text-slate-400">{row.docs || '-'}</td>
                           {isAdmin && (
                             <td className="p-4 text-center">
-                              <button onClick={() => setData(data.filter(d => d.id !== row.id))} className="text-rose-500 hover:text-rose-700">
+                              <button onClick={() => setData(prev => prev.filter(d => d.id !== row.id))} className="text-rose-500 hover:text-rose-700">
                                 <Icon name="trash" className="w-4 h-4" />
                               </button>
                             </td>
@@ -600,7 +649,6 @@ export default function App() {
                 </form>
               </div>
 
-              {/* History */}
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Dispatch History</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
@@ -669,7 +717,7 @@ export default function App() {
                   onClick={() => {
                     if (window.confirm("ඔබට සම්පූර්ණ දත්ත මකා දමා පද්ධතිය Reset කිරීමට අවශ්‍යද?")) {
                       localStorage.clear();
-                      setData([]);
+                      setData(INITIAL_DATA);
                       setYardFiles([]);
                       alert("පද්ධතියේ සියලු දත්ත සාර්ථකව Reset විය.");
                     }
@@ -703,5 +751,13 @@ export default function App() {
       )}
 
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <MainApp />
+    </ErrorBoundary>
   );
 }
