@@ -14,16 +14,16 @@ class ErrorBoundary extends Component {
       return (
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 text-center">
           <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-800 mb-2">පරණ Cache දත්ත ඉවත් කිරීම</h2>
-            <p className="text-sm text-slate-500 mb-6">පරණ දත්ත නිසා ඇතිවූ ගැටලුවකි. පහත බොත්තම ඔබා Reset කරන්න.</p>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">පද්ධතියේ දෝෂයක් මඟහරවන ලදී</h2>
+            <p className="text-sm text-slate-500 mb-6">පරණ LocalStorage Cache දත්ත නිසා ඇතිවූ ගැටලුවකි. පහත බොත්තම ඔබා Reset කරන්න.</p>
             <button
               onClick={() => {
                 localStorage.clear();
                 window.location.reload();
               }}
-              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg"
+              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg hover:bg-[#6c2ee0] transition-all"
             >
-              Clear Cache & Open App
+              Clear Cache & Reload App
             </button>
           </div>
         </div>
@@ -33,7 +33,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// --- INLINE SVG ICONS ---
+// --- INLINE SVG ICONS (කිසි විටෙකත් කැඩී නොයන ස්ථිර Icons) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -78,7 +78,7 @@ function MainApp() {
   // Safe LocalStorage Loader
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_clean_v7');
+      const saved = localStorage.getItem('wgYard_main_clean_v8');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -89,7 +89,7 @@ function MainApp() {
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_clean_v7');
+      const saved = localStorage.getItem('wgSeizers_main_clean_v8');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -100,7 +100,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_clean_v7');
+      const saved = localStorage.getItem('wgYardFiles_main_clean_v8');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
@@ -110,15 +110,15 @@ function MainApp() {
   });
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_clean_v7', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_main_clean_v8', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_clean_v7', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_main_clean_v8', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_clean_v7', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_main_clean_v8', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,8 +179,8 @@ function MainApp() {
     const newEntry = {
       id: Date.now().toString(),
       actionType: formData.actionType || 'Seized',
-      contractNo: formData.contractNo,
-      vehicleNo: formData.vehicleNo,
+      contractNo: formData.contractNo.trim().toUpperCase(),
+      vehicleNo: formData.vehicleNo.trim().toUpperCase(),
       clientName: formData.clientName || 'N/A',
       vehicleType: formData.vehicleType || 'Motorcycle',
       status: formData.orderStatus || 'ACTIVE',
@@ -224,7 +224,11 @@ function MainApp() {
     }
     const newDispatch = {
       id: Date.now().toString(),
-      ...yardDispatch,
+      contractNo: yardDispatch.contractNo.trim().toUpperCase(),
+      vehicleNo: yardDispatch.vehicleNo.trim().toUpperCase(),
+      toWhom: yardDispatch.toWhom,
+      epfNo: yardDispatch.epfNo,
+      sentDate: yardDispatch.sentDate,
       docs: [yardDispatch.sentMTA6 ? 'MTA6' : '', yardDispatch.sentIDCopy ? 'ID Copy' : ''].filter(Boolean).join(', ')
     };
     setYardFiles(prev => [newDispatch, ...prev]);
@@ -248,47 +252,71 @@ function MainApp() {
     document.body.removeChild(link);
   };
 
+  // --- AUTOMATIC VLOOKUP BY CONTRACT_NO (Column C) TO UPDATE CAPITAL_OUTSTANDING (Column N) ---
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (evt) => {
       try {
         const text = evt.target.result;
-        const lines = text.split('\n');
-        const imported = [];
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-          const cols = lines[i].split(',').map(s => s.replace(/(^"|"$)/g, '').trim());
-          if (cols[0] && cols[1]) {
-            imported.push({
-              id: Date.now().toString() + i,
-              contractNo: cols[0] || 'WGFBA055203',
-              vehicleNo: cols[1] || 'SP-XXX-0000',
-              clientName: cols[2] || 'Imported Client',
-              vehicleType: cols[3] || 'Motorcycle',
-              actionType: cols[4] || 'Seized',
-              yardLocation: cols[5] || 'Kurunegala Yard',
-              offsiteBranch: '',
-              status: cols[6] || 'ACTIVE',
-              trs: cols[7] === 'TRS',
-              outstanding: cols[8] || '0',
-              isSold: cols[9] || 'No',
-              clientPaid: cols[10] || 'No',
-              seizerPaymentStatus: cols[11] || 'Pending',
-              docs: cols[12] || ''
-            });
+        const lines = text.split(/\r\n|\n/);
+
+        // VLOOKUP Map (Key: CONTRACT_NO, Value: CAPITAL_OUTSTANDING)
+        const vlookupMap = {};
+
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+          // CSV Split (Quotes සහ Commas හැසිරවීම)
+          const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/(^"|"$)/g, '').trim());
+
+          // Excel Column C = Index 2 (CONTRACT_NO)
+          // Excel Column N = Index 13 (CAPITAL_OUTSTANDING)
+          const contractNo = cols[2];
+          const outstandingVal = cols[13];
+
+          if (
+            contractNo &&
+            contractNo.toUpperCase() !== 'CONTRACT_NO' &&
+            outstandingVal !== undefined &&
+            outstandingVal !== ''
+          ) {
+            const parsedNum = parseFloat(outstandingVal.replace(/,/g, ''));
+            if (!isNaN(parsedNum)) {
+              vlookupMap[contractNo.toUpperCase()] = parsedNum;
+            }
           }
-        }
-        if (imported.length > 0) {
-          setData(prev => [...imported, ...prev]);
-          alert(`${imported.length} ක් වන දත්ත සාර්ථකව Import කරන ලදී!`);
+        });
+
+        let updatedCount = 0;
+
+        // පද්ධතියේ දැනට පවතින දත්ත වලට VLOOKUP කර Outstanding Amount එක update කිරීම
+        setData(prevData => {
+          return prevData.map(item => {
+            const contractKey = (item.contractNo || '').trim().toUpperCase();
+            if (vlookupMap[contractKey] !== undefined) {
+              updatedCount++;
+              return {
+                ...item,
+                outstanding: vlookupMap[contractKey].toString()
+              };
+            }
+            return item;
+          });
+        });
+
+        if (updatedCount > 0) {
+          alert(`Excel VLOOKUP සාර්ථකයි!\nගිවිසුම් (Contract Numbers) ${updatedCount} ක Outstanding Amount එක සාර්ථකව Update කරන ලදී.`);
+        } else {
+          alert("Excel ගොනුවේ ඇති Contract Numbers (Column C) සමඟ ගැළපෙන ගිවිසුම් පද්ධතිය තුළ හමු නොවීය. කරුණාකර Column C හි Contract No පරීක්ෂා කරන්න.");
         }
       } catch (err) {
-        alert("File එක කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV ගොනුවක් ලබාදෙන්න.");
+        alert("ගොනුව කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV / Excel ගොනුවක් ලබා දෙන්න.");
       }
     };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
   const getVehicleImage = (type) => {
@@ -301,6 +329,7 @@ function MainApp() {
     }
   };
 
+  // Safe search filtering
   const filteredData = (data || []).filter(item => {
     const term = (searchTerm || '').toLowerCase();
     const cNo = (item?.contractNo || '').toLowerCase();
@@ -312,7 +341,7 @@ function MainApp() {
   return (
     <div className="flex h-screen bg-[#f4f7fb] text-slate-800 font-sans">
       
-      {/* Sidebar with Company Logo next to App Title */}
+      {/* Sidebar with Commercial Credit Logo next to App Title */}
       <aside className="w-72 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
         <div>
           <div className="h-28 flex items-center justify-center border-b border-white/10 mx-4 px-2">
@@ -354,7 +383,7 @@ function MainApp() {
         <div className="p-6">
           {isAdmin ? (
             <div className="bg-white/10 p-4 rounded-2xl border border-white/20">
-              <span className="text-xs font-bold block">Admin Access Active</span>
+              <span className="text-xs font-bold block">Admin Mode Active</span>
               <button onClick={() => setIsAdmin(false)} className="w-full mt-2 py-2 text-xs font-bold bg-rose-500 rounded-xl hover:bg-rose-600 transition-all">Logout</button>
             </div>
           ) : (
@@ -365,7 +394,7 @@ function MainApp() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-hidden px-6">
         
         {/* Top Header */}
@@ -382,8 +411,12 @@ function MainApp() {
           </div>
           <div className="flex items-center gap-4">
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="hidden" />
-            <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 shadow-sm rounded-full text-xs font-bold hover:shadow-md transition-all">
-              <Icon name="upload" className="w-4 h-4 text-emerald-600" /> IMPORT CSV/EXCEL
+            <button 
+              onClick={() => fileInputRef.current?.click()} 
+              title="Upload CSV with Column C as Contract No and Column N as Capital Outstanding"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 shadow-sm rounded-full text-xs font-bold hover:shadow-md transition-all border border-slate-200"
+            >
+              <Icon name="upload" className="w-4 h-4 text-emerald-600" /> VLOOKUP IMPORT (CSV)
             </button>
             <button onClick={exportToExcel} className="flex items-center gap-2 px-5 py-2.5 bg-[#7a3aec] text-white shadow-md rounded-full text-xs font-bold hover:bg-[#6c2ee0] transition-all">
               <Icon name="download" className="w-4 h-4" /> EXPORT EXCEL
@@ -434,7 +467,7 @@ function MainApp() {
                         <th className="p-4">Vehicle Type</th>
                         <th className="p-4">Method</th>
                         <th className="p-4">Yard Location</th>
-                        <th className="p-4">Outstanding</th>
+                        <th className="p-4">Outstanding (Rs.)</th>
                         <th className="p-4">Client Paid</th>
                         <th className="p-4">Seizer Payment</th>
                         <th className="p-4">Docs</th>
@@ -461,7 +494,7 @@ function MainApp() {
                           <td className="p-4 text-slate-600 font-medium">
                             {row.yardLocation === 'Offsite Yard' ? `Offsite - ${row.offsiteBranch || 'Branch'}` : row.yardLocation}
                           </td>
-                          <td className="p-4 font-mono font-semibold">Rs. {Number(row.outstanding || 0).toLocaleString()}</td>
+                          <td className="p-4 font-mono font-semibold text-blue-600">Rs. {Number(row.outstanding || 0).toLocaleString()}</td>
                           <td className="p-4">
                             <span className={`px-2 py-0.5 rounded text-xs font-bold ${row.clientPaid === 'Yes' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                               {row.clientPaid || 'No'}
@@ -497,15 +530,15 @@ function MainApp() {
               {wizardStep === 1 && (
                 <div className="space-y-5">
                   <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 mb-4">
-                    <label className="text-xs font-bold text-purple-700 uppercase block mb-2">1. Vehicle Entry Method *</label>
+                    <label className="text-xs font-bold text-purple-700 uppercase block mb-2">1. Vehicle Entry Method (වාහනය ඇතුළත් වන ක්‍රමය) *</label>
                     <div className="flex gap-4">
                       <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Seized' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Seized" checked={formData.actionType === 'Seized'} onChange={handleFormChange} className="hidden" />
-                        SEIZED
+                        SEIZED (අත්අඩංගුවට ගැනීම)
                       </label>
                       <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Handover' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Handover" checked={formData.actionType === 'Handover'} onChange={handleFormChange} className="hidden" />
-                        HANDOVER
+                        HANDOVER (භාරදීම)
                       </label>
                     </div>
                   </div>
@@ -625,7 +658,7 @@ function MainApp() {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">To Whom (භාරදුන් අයගේ නම) *</label>
-                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="නම ඇතුළත් කරන්න" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
+                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="Receiver Name" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">EPF No (EPF අංකය) *</label>
