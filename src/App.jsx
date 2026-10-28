@@ -1,45 +1,4 @@
-import React, { useState, useEffect, useRef, Component } from 'react';
-
-// --- Error Boundary (White screen prevention) ---
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-  componentDidCatch(error, errorInfo) {
-    console.error("Application Runtime Error:", error, errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center font-sans">
-          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
-            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
-              !
-            </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">System Notice</h2>
-            <p className="text-sm text-slate-500 mb-6">
-              A temporary local storage conflict was detected. Click below to clear cache and refresh smoothly.
-            </p>
-            <button
-              onClick={() => {
-                try { localStorage.clear(); } catch(e) {}
-                window.location.reload();
-              }}
-              className="w-full py-3 bg-[#8B0000] text-white font-bold rounded-xl shadow-lg hover:bg-[#700000] transition-all"
-            >
-              Clear Cache & Launch App
-            </button>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+import React, { useState, useEffect, useRef } from 'react';
 
 // --- Reliable SVG Icons (Zero Dependency) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
@@ -168,32 +127,41 @@ const getPendingSubOptionsCount = (item) => {
   return count;
 };
 
-// Calculate Expiry status and remaining days
+// Safe date calculation to avoid any NaN or runtime crashes
 const getOrderExpiryInfo = (printDate) => {
-  if (!printDate) return { status: 'ACTIVE', daysLeft: 14, isExpiringSoon: false };
-  const pDate = new Date(printDate);
-  const today = new Date();
-  const diffTime = today - pDate;
-  const elapsedDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  const daysLeft = 14 - elapsedDays;
-  if (daysLeft <= 0) {
-    return { status: 'EXPIRED', daysLeft: 0, isExpiringSoon: false };
+  if (!printDate || String(printDate).trim() === '') {
+    return { status: 'ACTIVE', daysLeft: 14, isExpiringSoon: false };
   }
-  return {
-    status: 'ACTIVE',
-    daysLeft,
-    isExpiringSoon: daysLeft <= 3
-  };
+  try {
+    const pDate = new Date(printDate);
+    if (isNaN(pDate.getTime())) {
+      return { status: 'ACTIVE', daysLeft: 14, isExpiringSoon: false };
+    }
+    const today = new Date();
+    const diffTime = today - pDate;
+    const elapsedDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const daysLeft = 14 - elapsedDays;
+    if (daysLeft <= 0) {
+      return { status: 'EXPIRED', daysLeft: 0, isExpiringSoon: false };
+    }
+    return {
+      status: 'ACTIVE',
+      daysLeft: isNaN(daysLeft) ? 14 : daysLeft,
+      isExpiringSoon: daysLeft <= 3
+    };
+  } catch (e) {
+    return { status: 'ACTIVE', daysLeft: 14, isExpiringSoon: false };
+  }
 };
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
-  // Safe localStorage Loader for journal entries
+  // Safe localStorage Loader with darkred version key
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_main_red_v25');
+      const saved = localStorage.getItem('wgYard_final_red_v26');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -205,7 +173,7 @@ function MainApp() {
   // Persistent Seizer Vault (Protected against standard resets)
   const [seizers, setSeizers] = useState(() => {
     try {
-      const savedVault = localStorage.getItem('wg_persistent_seizers_vault');
+      const savedVault = localStorage.getItem('wg_persistent_seizers_vault_v2');
       if (savedVault) {
         const parsed = JSON.parse(savedVault);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -216,7 +184,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_main_red_v25');
+      const saved = localStorage.getItem('wgYardFiles_final_red_v26');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
@@ -234,16 +202,15 @@ function MainApp() {
   const [filterTab, setFilterTab] = useState('all');
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_main_red_v25', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_final_red_v26', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
-  // Seizers saved in persistent storage
   useEffect(() => {
-    try { localStorage.setItem('wg_persistent_seizers_vault', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wg_persistent_seizers_vault_v2', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_main_red_v25', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_final_red_v26', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -300,15 +267,6 @@ function MainApp() {
   const [yardDispatch, setYardDispatch] = useState({
     contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false
   });
-
-  const calculateOrderStatus = (printDate) => {
-    if (!printDate) return 'ACTIVE';
-    const pDate = new Date(printDate);
-    const today = new Date();
-    const diffTime = today - pDate;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 14 ? 'ACTIVE' : 'EXPIRED';
-  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -443,9 +401,9 @@ function MainApp() {
       specialTerminationCase: Boolean(formData.specialTerminationCase),
       chargeAmount: formData.chargeAmount || '0',
       seizerFee: formData.seizerFee || '0',
-      isSold: formData.isSold || 'No',
-      soldAmount: formData.soldAmount || '0',
-      currentBalance: formData.currentBalance || '0',
+      isSold: 'No',
+      soldAmount: '0',
+      currentBalance: '0',
       clientPaid: formData.clientPaid || 'No',
       seizerPaymentStatus: formData.seizerPaymentStatus || 'Pending',
       docs: [
@@ -531,7 +489,6 @@ function MainApp() {
           const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/(^"|"$)/g, '').trim());
           const contractNo = cols[2];
           const outstandingVal = cols[13];
-          // Check if file has yard column (e.g. index 18 or 22 or designated)
           const yardColVal = cols[18];
 
           if (contractNo && String(contractNo).toUpperCase() !== 'CONTRACT_NO' && outstandingVal !== undefined && outstandingVal !== '') {
@@ -541,7 +498,6 @@ function MainApp() {
             }
           }
 
-          // Only record yard location if explicitly provided and not blank/dummy
           if (contractNo && yardColVal && yardColVal.trim() !== '' && yardColVal.toLowerCase() !== 'nat' && yardColVal.toLowerCase() !== 'nan') {
             yardUpdateMap[String(contractNo).trim().toUpperCase()] = yardColVal.trim();
           }
@@ -559,7 +515,6 @@ function MainApp() {
               updatedItem.chargeAmount = vlookupMap[key].toString();
               hasChange = true;
             }
-            // ONLY update yard location if file explicitly has a value!
             if (yardUpdateMap[key] !== undefined && yardUpdateMap[key] !== '') {
               updatedItem.yardLocation = yardUpdateMap[key];
               hasChange = true;
@@ -601,7 +556,7 @@ function MainApp() {
   const homagamaCount = safeData.filter(d => d.yardLocation === 'Homagama Yard').length;
   const offsiteCount = safeData.filter(d => d.yardLocation === 'Offsite').length;
   const pendingSubOptionsCount = safeData.filter(d => getPendingSubOptionsCount(d) > 0).length;
-  const totalPaymentSum = safeData.reduce((acc, curr) => acc + parseFloat(String(curr.chargeAmount || 0).replace(/,/g, '') || 0), 0);
+  const totalPaymentSum = safeData.reduce((acc, curr) => acc + (parseFloat(String(curr.chargeAmount || 0).replace(/,/g, '')) || 0), 0);
   const specialTerminationCount = safeData.filter(d => Boolean(d.specialTerminationCase)).length;
 
   // Category Counts
@@ -775,7 +730,7 @@ function MainApp() {
                 </div>
               )}
 
-              {/* Actionable KPI Summary Cards (Modern Red Gradient Accents) */}
+              {/* Actionable KPI Summary Cards */}
               <div className="grid grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between mb-2">
@@ -843,7 +798,7 @@ function MainApp() {
                 </div>
               </div>
 
-              {/* Modern Visual Statistics & Vehicle Categories (Inspired by Modern Financial Layouts) */}
+              {/* Modern Visual Statistics & Vehicle Categories */}
               <div className="grid grid-cols-3 gap-6">
                 
                 {/* Vehicle Categories Breakdown */}
@@ -1466,7 +1421,7 @@ function MainApp() {
                 <p className="text-xs text-slate-400">Standard resets preserve your persistent seizer database.</p>
               </div>
 
-              {/* Standard Reset (Preserves Seizers Vault) */}
+              {/* Standard Reset */}
               <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl">
                 <h3 className="text-base font-bold text-amber-800">Reset Journal Records Only</h3>
                 <p className="text-xs text-amber-700 mt-1 mb-4">This resets journal entries to default Excel data. All registered Seizers, photos, and bank accounts are safely preserved.</p>
@@ -1474,8 +1429,8 @@ function MainApp() {
                   onClick={() => {
                     if (window.confirm("Reset journal records to default Excel data? (Seizers Vault will be preserved)")) {
                       try {
-                        localStorage.removeItem('wgYard_main_red_v25');
-                        localStorage.removeItem('wgYardFiles_main_red_v25');
+                        localStorage.removeItem('wgYard_final_red_v26');
+                        localStorage.removeItem('wgYardFiles_final_red_v26');
                       } catch(e) {}
                       setData(INITIAL_RECORDS);
                       setYardFiles([]);
@@ -1488,7 +1443,7 @@ function MainApp() {
                 </button>
               </div>
 
-              {/* Admin Hard Factory Reset (Wipes Everything including Seizers) */}
+              {/* Admin Hard Factory Reset */}
               <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl">
                 <h3 className="text-base font-bold text-rose-700">Admin Hard Factory Reset</h3>
                 <p className="text-xs text-rose-600 mt-1 mb-4">Danger: Permanently wipes all journal records AND all seizer bank details & photos from local storage.</p>
