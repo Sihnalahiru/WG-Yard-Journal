@@ -12,16 +12,16 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 text-center">
-          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-800 mb-2">පද්ධතියේ Cache දෝෂයක් මඟහරවන ලදී</h2>
-            <p className="text-sm text-slate-500 mb-6">පරණ LocalStorage දත්ත ඉවත් කර යෙදුම නැවත විවෘත කිරීමට පහත බොත්තම ඔබන්න.</p>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '20px', fontFamily: 'sans-serif' }}>
+          <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '24px', maxWidth: '450px', width: '100%', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>පද්ධතියේ Cache දෝෂයක් මඟහරවන ලදී</h2>
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>බ්‍රවුසරයේ පැවති පැරණි දත්ත ඉවත් කර යෙදුම නැවත විවෘත කිරීමට පහත බොත්තම ඔබන්න.</p>
             <button
               onClick={() => {
                 try { localStorage.clear(); } catch(e) {}
                 window.location.reload();
               }}
-              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg hover:bg-[#6c2ee0] transition-all"
+              style={{ width: '100%', padding: '14px', backgroundColor: '#7a3aec', color: '#ffffff', fontWeight: 'bold', border: 'none', borderRadius: '14px', cursor: 'pointer', fontSize: '14px' }}
             >
               Clear Cache & Reload App
             </button>
@@ -72,29 +72,68 @@ const INITIAL_SEIZERS = [
   { id: '2', name: 'MR. N.G.C. MENDIS', nic: '923572619v', phone: '0719876543' }
 ];
 
-const INITIAL_DATA = [
-  { id: '1', contractNo: 'WGFBA055203', vehicleNo: 'SP-BJK-1182', clientName: 'Saman Kumara', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'ACTIVE', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '450000', seizerFee: '25000', isSold: 'No', soldAmount: '0', currentBalance: '450000', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6' }
+// Excel ගොනුවෙන් ලබාගත් සත්‍ය වාර්තා 40 (Default Data)
+const EXCEL_IMPORTED_DATA = [
+  { id: '1', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJK-1182', clientName: 'MR. H.S.SHALIKA SELLAHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '2', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJW-5312', clientName: 'MR. S.D.T.S.J. FERANANDO', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '3', contractNo: 'WGFBA060694', vehicleNo: 'SP-BGL-3152', clientName: 'MR. M.J.M. JUMAN', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'CANCELED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'Yes', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '4', contractNo: 'WGMBA061994', vehicleNo: 'SP-BJX-1479', clientName: 'MR. P.G.K.M. AMARASINGHE', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '5', contractNo: 'WGMBA059801', vehicleNo: 'SP-BJS-6785', clientName: 'MRS. A.G.U. SHASHIKALA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '6', contractNo: 'WGAUA027370', vehicleNo: '58-0171', clientName: 'MR. A.G.T. SANDAMAL', vehicleType: 'Car', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '7', contractNo: 'WGTWA068225', vehicleNo: 'SP-YI-3165', clientName: 'MR. M.N.M. ILHAM', vehicleType: 'Three-wheeler', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '8', contractNo: 'WGMBA065723', vehicleNo: 'SP-BKC-7134', clientName: 'MR. H.P.V. NILANKA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'CANCELED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'Yes', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '9', contractNo: 'WGMBA065705', vehicleNo: 'SP-BKC-7089', clientName: 'MR. K.P.D. KITHSIRI', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '10', contractNo: 'WGMBA065884', vehicleNo: 'SP-BKE-1731', clientName: 'MR. H.G.R. RAJKUMAR', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'SEIZED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '11', contractNo: 'WGFBA066999', vehicleNo: 'SP-BFU-6062', clientName: 'MR. A.K.P. NIMSARA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '12', contractNo: 'WGFBA065866', vehicleNo: 'WP-BEN-6453', clientName: 'MR. E.P. NADUN', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '13', contractNo: 'WGFBA060825', vehicleNo: 'CP-BFW-5502', clientName: 'MR. R.K. LORONSUHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '14', contractNo: 'WGMBA067961', vehicleNo: 'SP-BKI-2567', clientName: 'MR. C.P.G. JAYAWARDHANA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '15', contractNo: 'WGFBA066096', vehicleNo: 'SP-BFG-2391', clientName: 'MR. K.H.D. THARANGA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '16', contractNo: 'WGFBA058325', vehicleNo: 'SP-BAV-2298', clientName: 'MR. H.K.S. MADUSHANKA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '17', contractNo: 'WGMBA058750', vehicleNo: 'SP-BJQ-8237', clientName: 'MRS. M.M.F. AYSHA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '18', contractNo: 'WGFBA069853', vehicleNo: 'SP-BAS-6586', clientName: 'MR. W.A.N. UDAYANGA', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'SEIZED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '19', contractNo: 'WGBQA037377', vehicleNo: 'SP-BCQ-7009', clientName: 'MRS. A.R.S. RANASINGHA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '20', contractNo: 'WGMBA064292', vehicleNo: 'SP-BKA-3659', clientName: 'MR. M.D.A.P. ABEWICKRAMA', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'SEIZED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '21', contractNo: 'WGFBA061754', vehicleNo: 'SP-BBT-8848', clientName: 'MISS. H.H.T. HANSANI', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '22', contractNo: 'WGBQA054958', vehicleNo: 'SP-BGL-8268', clientName: 'MR. N.A. ABEYGUNAWARDENA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '23', contractNo: 'WGTWA030718', vehicleNo: 'SP-HB-5160', clientName: 'MR. B. JAYANTHA', vehicleType: 'Three-wheeler', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '24', contractNo: 'WGFBA071919', vehicleNo: 'NP-BIY-7311', clientName: 'MR. A.A. AWADH', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '27', contractNo: 'WGFBA068748', vehicleNo: 'SP-BGD-1781', clientName: 'MRS. N.H.K. WIKCRAMARATHNA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '28', contractNo: 'WGFBA056309', vehicleNo: 'SP-BEP-6577', clientName: 'MRS. H.G.N. CHANDIMA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+  { id: '29', contractNo: 'WGFBA074907', vehicleNo: 'NW-WX-0186', clientName: 'MISS. H.T.M. NIHATHAMANI', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '30', contractNo: 'WGFBA073120', vehicleNo: 'SP-XJ-7170', clientName: 'MR. J.V. SAMANTHA', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '31', contractNo: 'WGFBA069844', vehicleNo: 'SP-XF-5244', clientName: 'MR. M. ARUN', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '32', contractNo: 'WGFBA064478', vehicleNo: 'SP-BHY-8420', clientName: 'MR.M.T.M.ARKAM', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '33', contractNo: 'WGFBA074244', vehicleNo: 'UP-BJA-8693', clientName: 'MRS.K.W.Y.POORNIMA', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '34', contractNo: 'WGFBA073069', vehicleNo: 'SP-BEZ-4574', clientName: 'MRS. V.D. WAJIRANI', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '35', contractNo: 'WGFBA074907', vehicleNo: 'NW-WX-0186', clientName: 'MISS. H.T.M. NIHATHAMANI', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '36', contractNo: 'WGFBA075580', vehicleNo: 'SP-WS-4230', clientName: 'MR. S.D.P. DENAGAMAGE', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '37', contractNo: 'WGFBA057502', vehicleNo: 'SP-BCJ-5625', clientName: 'MRS. R.N.G.T.D. LANKAGE', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '38', contractNo: 'WGFBA069206', vehicleNo: 'SP-XP-9629', clientName: 'MR. P.B. VIRAJ', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '39', contractNo: 'WGFBA074341', vehicleNo: 'SP-BBF-2536', clientName: 'MR. K.K.I. MADUSANKA', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '40', contractNo: 'WGFBA074776', vehicleNo: 'SP-BAB-6332', clientName: 'MRS. L.M. GIMHANI', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '41', contractNo: 'WGFBA072538', vehicleNo: 'SP-BDS-7165', clientName: 'MR. U.G.P. MADUSHAN', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
+  { id: '42', contractNo: 'WGFBA074572', vehicleNo: 'SP-BDD-0061', clientName: 'MR. T.S.T. KUMARA', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' }
 ];
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
-  // Safe LocalStorage Loaders
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_main_prod_v10');
+      const saved = localStorage.getItem('wgYard_excel_imported_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
       }
     } catch (e) {}
-    return INITIAL_DATA;
+    return EXCEL_IMPORTED_DATA;
   });
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_main_prod_v10');
+      const saved = localStorage.getItem('wgSeizers_excel_imported_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -105,7 +144,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_main_prod_v10');
+      const saved = localStorage.getItem('wgYardFiles_excel_imported_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
@@ -115,15 +154,15 @@ function MainApp() {
   });
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_main_prod_v10', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_excel_imported_v1', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_main_prod_v10', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_excel_imported_v1', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_main_prod_v10', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_excel_imported_v1', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -258,7 +297,7 @@ function MainApp() {
     document.body.removeChild(link);
   };
 
-  // VLOOKUP Auto Matching: Column C (CONTRACT_NO) සහ Column N (CAPITAL_OUTSTANDING)[cite: 27]
+  // VLOOKUP Column C (CONTRACT_NO) to Column N (CAPITAL_OUTSTANDING)
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -273,8 +312,8 @@ function MainApp() {
         lines.forEach((line) => {
           if (!line || !line.trim()) return;
           const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/(^"|"$)/g, '').trim());
-          const contractNo = cols[2]; // Column C[cite: 27]
-          const outstandingVal = cols[13]; // Column N[cite: 27]
+          const contractNo = cols[2]; // Column C
+          const outstandingVal = cols[13]; // Column N
 
           if (
             contractNo &&
@@ -328,7 +367,7 @@ function MainApp() {
     }
   };
 
-  const safeData = Array.isArray(data) ? data.filter(Boolean) : INITIAL_DATA;
+  const safeData = Array.isArray(data) ? data.filter(Boolean) : EXCEL_IMPORTED_DATA;
   const safeSeizers = Array.isArray(seizers) ? seizers.filter(Boolean) : INITIAL_SEIZERS;
   const safeYardFiles = Array.isArray(yardFiles) ? yardFiles.filter(Boolean) : [];
 
@@ -456,9 +495,9 @@ function MainApp() {
               {/* Data Table */}
               <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                  <h2 className="text-lg font-bold text-slate-800">Master Intelligence Grid</h2>
+                  <h2 className="text-lg font-bold text-slate-800">Master Intelligence Grid (Active Database)</h2>
                   <span className="text-xs font-bold text-[#7a3aec] bg-[#7a3aec]/10 px-4 py-1.5 rounded-full">
-                    {filteredData.length} Entries
+                    {filteredData.length} Records Loaded
                   </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -491,8 +530,8 @@ function MainApp() {
                             </div>
                           </td>
                           <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row?.actionType === 'Seized' ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                              {String(row?.actionType || 'Seized')}
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row?.actionType === 'Seized' ? 'bg-amber-100 text-amber-700' : (row?.actionType === 'Handover' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600')}`}>
+                              {String(row?.actionType || 'N/A')}
                             </span>
                           </td>
                           <td className="p-4 text-slate-600 font-medium">
@@ -543,11 +582,11 @@ function MainApp() {
                     <div className="flex gap-4">
                       <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Seized' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Seized" checked={formData.actionType === 'Seized'} onChange={handleFormChange} className="hidden" />
-                        SEIZED (අත්අඩංගුවට ගැනීම)
+                        SEIZED
                       </label>
                       <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Handover' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Handover" checked={formData.actionType === 'Handover'} onChange={handleFormChange} className="hidden" />
-                        HANDOVER (භාරදීම)
+                        HANDOVER
                       </label>
                     </div>
                   </div>
@@ -666,11 +705,11 @@ function MainApp() {
                     <input type="text" value={yardDispatch.vehicleNo} onChange={e => setYardDispatch({...yardDispatch, vehicleNo: e.target.value})} placeholder="e.g. SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom (භාරදුන් අයගේ නම) *</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom *</label>
                     <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="Receiver Name" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">EPF No (EPF අංකය) *</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase">EPF No *</label>
                     <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="Receiver EPF No" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
                   </div>
                   <div>
@@ -694,7 +733,7 @@ function MainApp() {
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Dispatch History</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
-                  {safeYardFiles.length === 0 ? <p className="text-slate-400 text-sm">තවම වාර්තා නැත.</p> : safeYardFiles.map(f => (
+                  {safeYardFiles.length === 0 ? <p className="text-slate-400 text-sm">No dispatches recorded yet.</p> : safeYardFiles.map(f => (
                     <div key={f?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
                       <div>
                         <div className="font-bold text-blue-700">{String(f?.contractNo || '')} - {String(f?.vehicleNo || '')}</div>
@@ -754,14 +793,14 @@ function MainApp() {
               <h2 className="text-2xl font-bold mb-4 text-slate-800">System Reset & Danger Zone</h2>
               <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl">
                 <h3 className="text-lg font-bold text-rose-700">Clear All System Data</h3>
-                <p className="text-sm text-rose-600 mt-1 mb-4">පද්ධතියේ ඇති සියලුම Journal Entries, Seizer Records සහ Yard Dispatches සම්පූර්ණයෙන්ම මැකී යයි.</p>
+                <p className="text-sm text-rose-600 mt-1 mb-4">This will permanently delete all local storage records.</p>
                 <button 
                   onClick={() => {
-                    if (window.confirm("ඔබට සම්පූර්ණ දත්ත මකා දමා පද්ධතිය Reset කිරීමට අවශ්‍යද?")) {
+                    if (window.confirm("Are you sure you want to reset all data?")) {
                       try { localStorage.clear(); } catch(e) {}
-                      setData(INITIAL_DATA);
+                      setData(EXCEL_IMPORTED_DATA);
                       setYardFiles([]);
-                      alert("පද්ධතියේ සියලු දත්ත සාර්ථකව Reset විය.");
+                      alert("All data reset to Excel default!");
                     }
                   }} 
                   className="px-6 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-md hover:bg-rose-700"
