@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- Error Boundary (White screen වැළැක්වීමට) ---
+// --- Error Boundary (White screen prevention) ---
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -12,18 +12,23 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '20px', fontFamily: 'sans-serif' }}>
-          <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '24px', maxWidth: '450px', width: '100%', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>පද්ධතියේ Cache දෝෂයක් මඟහරවන ලදී</h2>
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>බ්‍රවුසරයේ පැවති පැරණි දත්ත ඉවත් කර යෙදුම නැවත විවෘත කිරීමට පහත බොත්තම ඔබන්න.</p>
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center font-sans">
+          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+              !
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Application Notice</h2>
+            <p className="text-sm text-slate-500 mb-6">
+              A temporary cache conflict was detected. Click below to clear stored cache and reload smoothly.
+            </p>
             <button
               onClick={() => {
                 try { localStorage.clear(); } catch(e) {}
                 window.location.reload();
               }}
-              style={{ width: '100%', padding: '14px', backgroundColor: '#7a3aec', color: '#ffffff', fontWeight: 'bold', border: 'none', borderRadius: '14px', cursor: 'pointer', fontSize: '14px' }}
+              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg hover:bg-[#6c2ee0] transition-all"
             >
-              Clear Cache & Reload App
+              Clear Cache & Launch App
             </button>
           </div>
         </div>
@@ -33,7 +38,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// --- ස්ථිර SVG Icons (කැඩී නොයන ලෙස) ---
+// --- Reliable Inline SVG Icons ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -46,9 +51,11 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
     upload: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />,
     trash: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />,
     lock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />,
-    check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+    check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />,
+    close: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />,
+    eye: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />,
+    edit: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
   };
-
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       {icons[name] || icons.dashboard}
@@ -67,54 +74,45 @@ const LORRY_IMG = getAssetUrl('Lorry.jpg');
 const BIKE_IMG = getAssetUrl('Motocycle.png');
 const THREE_WHEELER_IMG = getAssetUrl('Three-wheeler.png');
 
-const INITIAL_SEIZERS = [
-  { id: '1', name: 'Mr. K.A.P Indika', nic: '781032786v', phone: '0771234567' },
-  { id: '2', name: 'MR. N.G.C. MENDIS', nic: '923572619v', phone: '0719876543' }
+// 129 Branches List (Exact match)
+const BRANCHES_LIST = [
+  "Ambalangoda", "Ampara", "Anuradhapura", "Ahangama", "Akkaraipattu", "Akuressa", "Alawwa", "Ambalantota",
+  "Aralaganwila", "Avissawella", "Badulla", "Balangoda", "Bandarawela", "Batticaloa", "Beliatta",
+  "Benthota", "Bible", "Boralesgamuwa", "Chavakachcheri", "Chilaw", "Chunnakam", "Colombo",
+  "Dambulla", "Dehiattakandiya", "Dehiwala", "Deniyaya", "Digana", "Divulapitiya", "Diyatalawa",
+  "Dompe", "Elpitiya", "Embilipitiya", "Eppawala", "Galenbindunuwewa", "Galewela", "Galle",
+  "Gampaha", "Gampola", "Ganemulla", "Giriulla", "Godakawela", "Habarana", "Hambantota", "Hanwella",
+  "Hatton", "Hikkaduwa", "Hingurakgoda", "Homagama", "Horana", "Ja-Ela", "Jaffna", "Kadawatha",
+  "Kaduwela", "Kahawatta", "Kalmunai", "Kalutara", "Kamburupitiya", "Kandy", "Karapitiya", "Katugastota",
+  "Katunayake", "Kegalle", "Kekirawa", "Kilinochchi", "Kiribathgoda", "Kirinda", "Kuliyapitiya", "Kurunegala",
+  "Kuruwita", "Maharagama", "Mahiyanganaya", "Maho", "Malabe", "Mannar", "Marawila", "Matale",
+  "Matara", "Mathugama", "Mawanella", "Medawachchiya", "Minuwangoda", "Mirigama", "Monaragala", "Moratuwa",
+  "Mullaitivu", "Narammala", "Nawalapitiya", "Negombo", "Nelliady", "Nikaweratiya", "Nittambuwa", "Nuwara Eliya",
+  "Padaviya", "Panadura", "Pannala", "Pelmadulla", "Peradeniya", "Pilimathalawa", "Piliyandala", "Polonnaruwa",
+  "Puttalam", "Radawana", "Ragama", "Rajagiriya", "Rakwana", "Ranala", "Ratnapura", "Ruwanwella",
+  "Seeduwa", "Sigiriya", "Tangalle", "Thambuttegama", "Thanamalwila", "Thihariya", "Trincomalee", "Udugama",
+  "Udugampola", "Valachchenai", "Vavuniya", "Veyangoda", "Warakapola", "Wattala", "Wariyapola", "Weligama",
+  "Welimada", "Welisara", "Wellawaya", "Wennappuwa", "Yakkala"
 ];
 
-// Excel ගොනුවෙන් ලබාගත් සත්‍ය වාර්තා 40 (Default Data)
-const EXCEL_IMPORTED_DATA = [
-  { id: '1', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJK-1182', clientName: 'MR. H.S.SHALIKA SELLAHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '2', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJW-5312', clientName: 'MR. S.D.T.S.J. FERANANDO', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '3', contractNo: 'WGFBA060694', vehicleNo: 'SP-BGL-3152', clientName: 'MR. M.J.M. JUMAN', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'CANCELED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'Yes', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '4', contractNo: 'WGMBA061994', vehicleNo: 'SP-BJX-1479', clientName: 'MR. P.G.K.M. AMARASINGHE', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '5', contractNo: 'WGMBA059801', vehicleNo: 'SP-BJS-6785', clientName: 'MRS. A.G.U. SHASHIKALA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '6', contractNo: 'WGAUA027370', vehicleNo: '58-0171', clientName: 'MR. A.G.T. SANDAMAL', vehicleType: 'Car', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '7', contractNo: 'WGTWA068225', vehicleNo: 'SP-YI-3165', clientName: 'MR. M.N.M. ILHAM', vehicleType: 'Three-wheeler', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '8', contractNo: 'WGMBA065723', vehicleNo: 'SP-BKC-7134', clientName: 'MR. H.P.V. NILANKA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'CANCELED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'Yes', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '9', contractNo: 'WGMBA065705', vehicleNo: 'SP-BKC-7089', clientName: 'MR. K.P.D. KITHSIRI', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '10', contractNo: 'WGMBA065884', vehicleNo: 'SP-BKE-1731', clientName: 'MR. H.G.R. RAJKUMAR', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'SEIZED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '11', contractNo: 'WGFBA066999', vehicleNo: 'SP-BFU-6062', clientName: 'MR. A.K.P. NIMSARA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '12', contractNo: 'WGFBA065866', vehicleNo: 'WP-BEN-6453', clientName: 'MR. E.P. NADUN', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '13', contractNo: 'WGFBA060825', vehicleNo: 'CP-BFW-5502', clientName: 'MR. R.K. LORONSUHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '14', contractNo: 'WGMBA067961', vehicleNo: 'SP-BKI-2567', clientName: 'MR. C.P.G. JAYAWARDHANA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '15', contractNo: 'WGFBA066096', vehicleNo: 'SP-BFG-2391', clientName: 'MR. K.H.D. THARANGA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '16', contractNo: 'WGFBA058325', vehicleNo: 'SP-BAV-2298', clientName: 'MR. H.K.S. MADUSHANKA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '17', contractNo: 'WGMBA058750', vehicleNo: 'SP-BJQ-8237', clientName: 'MRS. M.M.F. AYSHA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '18', contractNo: 'WGFBA069853', vehicleNo: 'SP-BAS-6586', clientName: 'MR. W.A.N. UDAYANGA', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'SEIZED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '19', contractNo: 'WGBQA037377', vehicleNo: 'SP-BCQ-7009', clientName: 'MRS. A.R.S. RANASINGHA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '20', contractNo: 'WGMBA064292', vehicleNo: 'SP-BKA-3659', clientName: 'MR. M.D.A.P. ABEWICKRAMA', vehicleType: 'Motorcycle', actionType: 'Seized', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'SEIZED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '21', contractNo: 'WGFBA061754', vehicleNo: 'SP-BBT-8848', clientName: 'MISS. H.H.T. HANSANI', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '22', contractNo: 'WGBQA054958', vehicleNo: 'SP-BGL-8268', clientName: 'MR. N.A. ABEYGUNAWARDENA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '23', contractNo: 'WGTWA030718', vehicleNo: 'SP-HB-5160', clientName: 'MR. B. JAYANTHA', vehicleType: 'Three-wheeler', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'Mr. K.A.P Indika', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '24', contractNo: 'WGFBA071919', vehicleNo: 'NP-BIY-7311', clientName: 'MR. A.A. AWADH', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '27', contractNo: 'WGFBA068748', vehicleNo: 'SP-BGD-1781', clientName: 'MRS. N.H.K. WIKCRAMARATHNA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '28', contractNo: 'WGFBA056309', vehicleNo: 'SP-BEP-6577', clientName: 'MRS. H.G.N. CHANDIMA', vehicleType: 'Motorcycle', actionType: 'Order Issued', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'EXPIRED', trs: false, seizerName: 'MR. N.G.C. MENDIS', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '29', contractNo: 'WGFBA074907', vehicleNo: 'NW-WX-0186', clientName: 'MISS. H.T.M. NIHATHAMANI', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '30', contractNo: 'WGFBA073120', vehicleNo: 'SP-XJ-7170', clientName: 'MR. J.V. SAMANTHA', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '31', contractNo: 'WGFBA069844', vehicleNo: 'SP-XF-5244', clientName: 'MR. M. ARUN', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '32', contractNo: 'WGFBA064478', vehicleNo: 'SP-BHY-8420', clientName: 'MR.M.T.M.ARKAM', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '33', contractNo: 'WGFBA074244', vehicleNo: 'UP-BJA-8693', clientName: 'MRS.K.W.Y.POORNIMA', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '34', contractNo: 'WGFBA073069', vehicleNo: 'SP-BEZ-4574', clientName: 'MRS. V.D. WAJIRANI', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '35', contractNo: 'WGFBA074907', vehicleNo: 'NW-WX-0186', clientName: 'MISS. H.T.M. NIHATHAMANI', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '36', contractNo: 'WGFBA075580', vehicleNo: 'SP-WS-4230', clientName: 'MR. S.D.P. DENAGAMAGE', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '37', contractNo: 'WGFBA057502', vehicleNo: 'SP-BCJ-5625', clientName: 'MRS. R.N.G.T.D. LANKAGE', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '38', contractNo: 'WGFBA069206', vehicleNo: 'SP-XP-9629', clientName: 'MR. P.B. VIRAJ', vehicleType: 'Three-wheeler', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '39', contractNo: 'WGFBA074341', vehicleNo: 'SP-BBF-2536', clientName: 'MR. K.K.I. MADUSANKA', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '40', contractNo: 'WGFBA074776', vehicleNo: 'SP-BAB-6332', clientName: 'MRS. L.M. GIMHANI', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '41', contractNo: 'WGFBA072538', vehicleNo: 'SP-BDS-7165', clientName: 'MR. U.G.P. MADUSHAN', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' },
-  { id: '42', contractNo: 'WGFBA074572', vehicleNo: 'SP-BDD-0061', clientName: 'MR. T.S.T. KUMARA', vehicleType: 'Motorcycle', actionType: 'Handover', yardLocation: 'Kurunegala Yard', offsiteBranch: '', status: 'HANDOVER', trs: false, seizerName: '', outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' }
+const INITIAL_SEIZERS = [
+  { id: '1', name: 'Mr. K.A.P Indika', nic: '781032786v', phone: '0771234567', accountNo: '1002345678', passbookImg: '', photo: '' },
+  { id: '2', name: 'MR. N.G.C. MENDIS', nic: '923572619v', phone: '0719876543', accountNo: '1008765432', passbookImg: '', photo: '' }
 ];
+
+// Helper to count pending Sub-Options
+const getPendingSubOptionsCount = (item) => {
+  if (!item) return 0;
+  let count = 0;
+  if (!item.orderPrintDate) count++;
+  if (!item.orderIssuedDate) count++;
+  if (!item.seizerPaymentReleaseDate) count++;
+  if (!item.reprocessRequest || item.reprocessRequest === 'Pending') count++;
+  if (!item.hNumber) count++;
+  if (!item.recoveryOfficer) count++;
+  if (!item.yardDate) count++;
+  return count;
+};
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -122,18 +120,22 @@ function MainApp() {
 
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_excel_imported_v1');
+      const saved = localStorage.getItem('wgYard_db_v16');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
       }
     } catch (e) {}
-    return EXCEL_IMPORTED_DATA;
+    return [
+      { id: '1', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJK-1182', clientName: 'MR. H.S.SHALIKA SELLAHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S866797', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
+      { id: '10', contractNo: 'WGMBA065884', vehicleNo: 'SP-BKE-1731', clientName: 'MR. H.G.R. RAJKUMAR', vehicleType: 'Motorcycle', actionType: 'Seized', serialNo: 'S867336', seizerName: 'MR. N.G.C. MENDIS', seizerID: '923572619v', orderPrintDate: '2026-07-27', orderIssuedDate: '2026-07-27', seizedDate: '2026-07-27', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '2026-07-30', specialTerminationCase: false, outstanding: '42000', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Completed', docs: 'MTA6, ID Copy' },
+      { id: '29', contractNo: 'WGFBA074907', vehicleNo: 'NW-WX-0186', clientName: 'MISS. H.T.M. NIHATHAMANI', vehicleType: 'Three-wheeler', actionType: 'Handover', serialNo: '', seizerName: '', seizerID: '', orderPrintDate: '', orderIssuedDate: '', seizedDate: '', status: 'ACTIVE', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: 'Client', handOverDate: '2026-09-24', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: 'H00901399', yardLocation: 'Offsite', recoveryOfficer: 'shadeeshan', handOverBranch: 'Ampara', orderCancelDate: '', informToSeizer: false, yardDate: '2026-09-26', specialTerminationCase: false, outstanding: '15000', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' }
+    ];
   });
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_excel_imported_v1');
+      const saved = localStorage.getItem('wgSeizers_db_v16');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -144,7 +146,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_excel_imported_v1');
+      const saved = localStorage.getItem('wgYardFiles_db_v16');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
@@ -153,16 +155,20 @@ function MainApp() {
     return [];
   });
 
+  // Modal States
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [editingRecord, setEditingRecord] = useState(null);
+
   useEffect(() => {
-    try { localStorage.setItem('wgYard_excel_imported_v1', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_db_v16', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_excel_imported_v1', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_db_v16', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_excel_imported_v1', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_db_v16', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -172,20 +178,63 @@ function MainApp() {
 
   const [wizardStep, setWizardStep] = useState(1);
   const [formData, setFormData] = useState({
+    // MAIN (Compulsory Options)
+    contractNo: '',
+    clientName: '',
+    vehicleNo: '',
+    serialNo: '',
+    seizerName: '',
+    seizerID: '',
+    seizedDate: '',
     actionType: 'Seized',
-    contractNo: '', trs: false, clientName: '', vehicleNo: '', vehicleType: 'Motorcycle',
-    seizerName: '', seizerID: '', orderStatus: 'ACTIVE', seizedDate: '',
-    yardLocation: 'Kurunegala Yard', offsiteBranch: '',
-    outstanding: '', seizerFee: '', isSold: 'No', soldAmount: '', currentBalance: '',
-    clientPaid: 'No', seizerPaymentStatus: 'Pending', specialApproval: false,
-    docsMTA6: false, docsID: false, docsHForm: false, docsLetter: false, remarks: ''
+    handOverBy: 'Client',
+    handOverDate: '',
+    releaseType: 'Mortgage Release',
+    vehicleType: 'Motorcycle',
+
+    // MAIN / SUB OPTION (Optional at first, updated later)
+    orderPrintDate: '',
+    orderIssuedDate: '',
+    seizerSpecialApprove: false,
+    seizerPaymentReleaseDate: '',
+    reprocessRequest: 'Pending',
+    hNumber: '',
+    yardLocation: 'Kurunegala Yard',
+    recoveryOfficer: '',
+    handOverBranch: '',
+    orderCancelDate: '',
+    informToSeizer: false,
+    yardDate: '',
+    specialTerminationCase: false,
+    outstanding: '',
+    seizerFee: '',
+    isSold: 'No',
+    soldAmount: '',
+    currentBalance: '',
+    clientPaid: 'No',
+    seizerPaymentStatus: 'Pending',
+    docsMTA6: false,
+    docsID: false,
+    docsHForm: false,
+    docsLetter: false
   });
 
-  const [newSeizer, setNewSeizer] = useState({ name: '', nic: '', phone: '' });
+  const [newSeizer, setNewSeizer] = useState({
+    name: '', nic: '', phone: '', accountNo: '', passbookImg: '', photo: ''
+  });
 
   const [yardDispatch, setYardDispatch] = useState({
     contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false
   });
+
+  const calculateOrderStatus = (printDate) => {
+    if (!printDate) return 'ACTIVE';
+    const pDate = new Date(printDate);
+    const today = new Date();
+    const diffTime = today - pDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 14 ? 'ACTIVE' : 'EXPIRED';
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -194,7 +243,7 @@ function MainApp() {
       setShowLogin(false);
       setLoginCreds({ user: '', pass: '' });
     } else {
-      alert("වලංගු නොවන Admin මුරපදයකි!");
+      alert("Invalid Admin Credentials!");
     }
   };
 
@@ -203,35 +252,90 @@ function MainApp() {
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const handleEditChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditingRecord(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handleSeizerSelect = (name) => {
+    const matched = seizers.find(s => s.name === name);
+    setFormData(prev => ({
+      ...prev,
+      seizerName: name,
+      seizerID: matched ? matched.nic : ''
+    }));
+  };
+
+  const handleFileUploadAsBase64 = (e, field) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (uploadEvt) => {
+      setNewSeizer(prev => ({ ...prev, [field]: uploadEvt.target.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const submitNewSeizer = (e) => {
     e.preventDefault();
-    if (!newSeizer.name || !newSeizer.nic) {
-      alert("කරුණාකර Seizer ගේ නම සහ ID අංකය ඇතුළත් කරන්න.");
+    if (!newSeizer.name || !newSeizer.nic || !newSeizer.accountNo) {
+      alert("Please enter Seizer Name, NIC, and Account Number.");
       return;
     }
     const added = { id: Date.now().toString(), ...newSeizer };
     setSeizers(prev => [...prev, added]);
-    setNewSeizer({ name: '', nic: '', phone: '' });
-    alert("අලුත් Seizer සාර්ථකව පද්ධතියට එක් කරන ලදී!");
+    setNewSeizer({ name: '', nic: '', phone: '', accountNo: '', passbookImg: '', photo: '' });
+    alert("New Seizer registered successfully!");
   };
 
+  // MAIN OPTIONS VALIDATION ONLY (Compulsory fields)
   const submitForm = () => {
-    if (!formData.contractNo || !formData.vehicleNo) {
-      alert("Contract No සහ Vehicle No අනිවාර්යයෙන්ම ඇතුළත් කළ යුතුය.");
+    if (!formData.contractNo || !formData.vehicleNo || !formData.clientName || !formData.serialNo) {
+      alert("Contract No, Vehicle No, Client Name, and Serial No are compulsory Main fields.");
       return;
     }
+
+    if (formData.actionType === 'Seized' && (!formData.seizerName || !formData.seizedDate)) {
+      alert("Seizer Name and Seized Date are compulsory for Seized vehicles.");
+      return;
+    }
+
+    if (formData.actionType === 'Handover' && !formData.handOverDate) {
+      alert("Hand Over Date is compulsory for Handover vehicles.");
+      return;
+    }
+
+    const calculatedStatus = calculateOrderStatus(formData.orderPrintDate);
+
     const newEntry = {
       id: Date.now().toString(),
-      actionType: formData.actionType || 'Seized',
       contractNo: String(formData.contractNo).trim().toUpperCase(),
+      clientName: formData.clientName,
       vehicleNo: String(formData.vehicleNo).trim().toUpperCase(),
-      clientName: formData.clientName || 'N/A',
-      vehicleType: formData.vehicleType || 'Motorcycle',
-      status: formData.orderStatus || 'ACTIVE',
-      trs: Boolean(formData.trs),
+      serialNo: formData.serialNo || '',
       seizerName: formData.seizerName || '',
+      seizerID: formData.seizerID || '',
+      seizedDate: formData.seizedDate || '',
+      actionType: formData.actionType || 'Seized',
+      handOverBy: formData.actionType === 'Handover' ? (formData.handOverBy || 'Client') : '',
+      handOverDate: formData.actionType === 'Handover' ? formData.handOverDate : '',
+      releaseType: formData.releaseType || 'Mortgage Release',
+      vehicleType: formData.vehicleType || 'Motorcycle',
+      status: calculatedStatus,
+
+      orderPrintDate: formData.orderPrintDate || '',
+      orderIssuedDate: formData.orderIssuedDate || '',
+      seizerSpecialApprove: Boolean(formData.seizerSpecialApprove),
+      seizerPaymentReleaseDate: formData.seizerPaymentReleaseDate || '',
+      reprocessRequest: formData.reprocessRequest || 'Pending',
+      hNumber: formData.hNumber || '',
       yardLocation: formData.yardLocation || 'Kurunegala Yard',
-      offsiteBranch: formData.yardLocation === 'Offsite Yard' ? formData.offsiteBranch : '',
+      recoveryOfficer: formData.recoveryOfficer || '',
+      handOverBranch: formData.handOverBranch || '',
+      orderCancelDate: formData.orderCancelDate || '',
+      informToSeizer: Boolean(formData.informToSeizer),
+      yardDate: formData.yardDate || '',
+      specialTerminationCase: Boolean(formData.specialTerminationCase),
       outstanding: formData.outstanding || '0',
       seizerFee: formData.seizerFee || '0',
       isSold: formData.isSold || 'No',
@@ -250,20 +354,23 @@ function MainApp() {
     setData(prev => [newEntry, ...(Array.isArray(prev) ? prev : [])]);
     setActiveTab('dashboard');
     setWizardStep(1);
-    setFormData({
-      actionType: 'Seized', contractNo: '', trs: false, clientName: '', vehicleNo: '', vehicleType: 'Motorcycle',
-      seizerName: '', seizerID: '', orderStatus: 'ACTIVE', seizedDate: '', yardLocation: 'Kurunegala Yard', offsiteBranch: '',
-      outstanding: '', seizerFee: '', isSold: 'No', soldAmount: '', currentBalance: '',
-      clientPaid: 'No', seizerPaymentStatus: 'Pending', specialApproval: false,
-      docsMTA6: false, docsID: false, docsHForm: false, docsLetter: false, remarks: ''
-    });
-    alert("දත්ත සාර්ථකව ඇතුළත් කරන ලදී!");
+    alert("New Entry Saved Successfully! Incomplete Sub-Options are marked as Pending in the list.");
+  };
+
+  const saveUpdatedRecord = () => {
+    if (!editingRecord) return;
+    setData(prev => prev.map(item => item.id === editingRecord.id ? editingRecord : item));
+    if (selectedRecord && selectedRecord.id === editingRecord.id) {
+      setSelectedRecord(editingRecord);
+    }
+    setEditingRecord(null);
+    alert("Sub-Options updated successfully!");
   };
 
   const submitYardDispatch = (e) => {
     e.preventDefault();
     if (!yardDispatch.contractNo || !yardDispatch.vehicleNo || !yardDispatch.toWhom || !yardDispatch.epfNo) {
-      alert("කරුණාකර සියලුම තොරතුරු සම්පූර්ණ කරන්න.");
+      alert("Please fill all required fields.");
       return;
     }
     const newDispatch = {
@@ -277,27 +384,24 @@ function MainApp() {
     };
     setYardFiles(prev => [newDispatch, ...(Array.isArray(prev) ? prev : [])]);
     setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false });
-    alert("ලිපිගොනු Yard එකට යැවීමේ සටහන සුරැකිණි!");
+    alert("Yard file dispatch recorded!");
   };
 
   const exportToExcel = () => {
-    let csvContent = "\uFEFFContract No,Vehicle No,Client Name,Type,Method,Yard/Branch,Status,TRS,Outstanding,Sold,Client Paid,Seizer Payment,Documents\n";
-    const safeRows = Array.isArray(data) ? data.filter(Boolean) : [];
-    safeRows.forEach(row => {
-      const yardInfo = row.yardLocation === 'Offsite Yard' ? `Offsite (${row.offsiteBranch || 'N/A'})` : (row.yardLocation || '');
-      csvContent += `"${row.contractNo || ''}","${row.vehicleNo || ''}","${row.clientName || ''}","${row.vehicleType || ''}","${row.actionType || ''}","${yardInfo}","${row.status || ''}","${row.trs ? 'TRS' : 'NO'}","${row.outstanding || 0}","${row.isSold || 'No'}","${row.clientPaid || 'No'}","${row.seizerPaymentStatus || ''}","${row.docs || ''}"\n`;
+    let csvContent = "\uFEFFContract No,Client Name,Vehicle No,Serial No,Seizer Name,Seizer ID,Order Print Date,Order Issued Date,Seized Date,Status,Seizer Payment,Payment Release Date,Hand Over By,Hand Over Date,Release Type,Reprocess Request,H Number,Yard Location,Recovery Officer,Hand Over Branch,Order Cancel Date,Yard Date,Outstanding,Client Paid,Seizer Payment Status,Docs\n";
+    (data || []).forEach(r => {
+      csvContent += `"${r.contractNo || ''}","${r.clientName || ''}","${r.vehicleNo || ''}","${r.serialNo || ''}","${r.seizerName || ''}","${r.seizerID || ''}","${r.orderPrintDate || ''}","${r.orderIssuedDate || ''}","${r.seizedDate || ''}","${r.status || ''}","${r.seizerSpecialApprove ? 'Special Approved' : 'Normal'}","${r.seizerPaymentReleaseDate || ''}","${r.handOverBy || ''}","${r.handOverDate || ''}","${r.releaseType || ''}","${r.reprocessRequest || ''}","${r.hNumber || ''}","${r.yardLocation || ''}","${r.recoveryOfficer || ''}","${r.handOverBranch || ''}","${r.orderCancelDate || ''}","${r.yardDate || ''}","${r.outstanding || 0}","${r.clientPaid || 'No'}","${r.seizerPaymentStatus || ''}","${r.docs || ''}"\n`;
     });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `WG_Yard_Journal_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `WG_Yard_Journal_Full_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // VLOOKUP Column C (CONTRACT_NO) to Column N (CAPITAL_OUTSTANDING)
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -312,15 +416,10 @@ function MainApp() {
         lines.forEach((line) => {
           if (!line || !line.trim()) return;
           const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/(^"|"$)/g, '').trim());
-          const contractNo = cols[2]; // Column C
-          const outstandingVal = cols[13]; // Column N
+          const contractNo = cols[2];
+          const outstandingVal = cols[13];
 
-          if (
-            contractNo &&
-            String(contractNo).toUpperCase() !== 'CONTRACT_NO' &&
-            outstandingVal !== undefined &&
-            outstandingVal !== ''
-          ) {
+          if (contractNo && String(contractNo).toUpperCase() !== 'CONTRACT_NO' && outstandingVal !== undefined && outstandingVal !== '') {
             const parsedNum = parseFloat(String(outstandingVal).replace(/,/g, ''));
             if (!isNaN(parsedNum)) {
               vlookupMap[String(contractNo).trim().toUpperCase()] = parsedNum;
@@ -330,27 +429,20 @@ function MainApp() {
 
         let updatedCount = 0;
         setData(prevData => {
-          const safeData = Array.isArray(prevData) ? prevData.filter(Boolean) : [];
-          return safeData.map(item => {
-            const contractKey = String(item.contractNo || '').trim().toUpperCase();
-            if (vlookupMap[contractKey] !== undefined) {
+          const safe = Array.isArray(prevData) ? prevData.filter(Boolean) : [];
+          return safe.map(item => {
+            const key = String(item.contractNo || '').trim().toUpperCase();
+            if (vlookupMap[key] !== undefined) {
               updatedCount++;
-              return {
-                ...item,
-                outstanding: vlookupMap[contractKey].toString()
-              };
+              return { ...item, outstanding: vlookupMap[key].toString() };
             }
             return item;
           });
         });
 
-        if (updatedCount > 0) {
-          alert(`Excel VLOOKUP සාර්ථකයි!\nගිවිසුම් ${updatedCount} ක Outstanding Amount එක සාර්ථකව Update කරන ලදී.`);
-        } else {
-          alert("Excel ගොනුවේ Column C හි ඇති Contract Numbers සමඟ ගැළපෙන කිසිදු ගිවිසුමක් පද්ධතියේ හමු නොවීය. කරුණාකර Column C පරීක්ෂා කරන්න.");
-        }
+        alert(`VLOOKUP Match Complete! Updated Outstanding for ${updatedCount} contracts.`);
       } catch (err) {
-        alert("ගොනුව කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV ගොනුවක් ලබා දෙන්න.");
+        alert("Error parsing CSV file.");
       }
     };
     reader.readAsText(file);
@@ -367,7 +459,7 @@ function MainApp() {
     }
   };
 
-  const safeData = Array.isArray(data) ? data.filter(Boolean) : EXCEL_IMPORTED_DATA;
+  const safeData = Array.isArray(data) ? data.filter(Boolean) : [];
   const safeSeizers = Array.isArray(seizers) ? seizers.filter(Boolean) : INITIAL_SEIZERS;
   const safeYardFiles = Array.isArray(yardFiles) ? yardFiles.filter(Boolean) : [];
 
@@ -378,13 +470,14 @@ function MainApp() {
     const cNo = String(item.contractNo || '').toLowerCase();
     const vNo = String(item.vehicleNo || '').toLowerCase();
     const cName = String(item.clientName || '').toLowerCase();
-    return cNo.includes(term) || vNo.includes(term) || cName.includes(term);
+    const sName = String(item.seizerName || '').toLowerCase();
+    return cNo.includes(term) || vNo.includes(term) || cName.includes(term) || sName.includes(term);
   });
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', backgroundColor: '#f4f7fb' }} className="text-slate-800 font-sans">
       
-      {/* Sidebar with Commercial Credit Logo */}
+      {/* Sidebar Navigation */}
       <aside className="w-72 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
         <div>
           <div className="h-28 flex items-center justify-center border-b border-white/10 mx-4 px-2">
@@ -403,20 +496,35 @@ function MainApp() {
           </div>
           
           <nav className="p-4 space-y-2 mt-4">
-            <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'dashboard' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            <button 
+              onClick={() => setActiveTab('dashboard')} 
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'dashboard' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+            >
               <Icon name="dashboard" /> Dashboard
             </button>
-            <button onClick={() => setActiveTab('new')} className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'new' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            <button 
+              onClick={() => setActiveTab('new')} 
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'new' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+            >
               <Icon name="plus" /> New Entry
             </button>
-            <button onClick={() => setActiveTab('yardfiles')} className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'yardfiles' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+            <button 
+              onClick={() => setActiveTab('yardfiles')} 
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'yardfiles' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+            >
               <Icon name="send" /> Send to Yard
             </button>
-            <button onClick={() => setActiveTab('seizers')} className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'seizers' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
-              <Icon name="users" /> Manage Seizers
+            <button 
+              onClick={() => setActiveTab('seizers')} 
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${activeTab === 'seizers' ? 'bg-white text-[#7a3aec] shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+            >
+              <Icon name="users" /> Seizer Register
             </button>
             {isAdmin && (
-              <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all mt-6 ${activeTab === 'settings' ? 'bg-white text-rose-600 shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}>
+              <button 
+                onClick={() => setActiveTab('settings')} 
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all mt-6 ${activeTab === 'settings' ? 'bg-white text-rose-600 shadow-lg' : 'text-white/70 hover:text-white hover:bg-white/10'}`}
+              >
                 <Icon name="settings" /> Settings & Reset
               </button>
             )}
@@ -437,16 +545,16 @@ function MainApp() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Container */}
       <main className="flex-1 flex flex-col overflow-hidden px-6">
         
-        {/* Top Header */}
+        {/* Top App Header */}
         <header className="h-24 flex items-center justify-between pt-4">
           <div className="relative w-96">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon name="search" className="w-5 h-5"/></span>
             <input 
               type="text" 
-              placeholder="Search Contract, Vehicle No..." 
+              placeholder="Search Contract, Vehicle No, Client..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white shadow-sm rounded-full pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7a3aec]/30"
@@ -456,12 +564,15 @@ function MainApp() {
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="hidden" />
             <button 
               onClick={() => fileInputRef.current?.click()} 
-              title="Upload CSV (Column C: Contract No, Column N: Capital Outstanding)"
+              title="VLOOKUP Update Outstanding from CSV Column C & N"
               className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 shadow-sm rounded-full text-xs font-bold hover:shadow-md transition-all border border-slate-200"
             >
               <Icon name="upload" className="w-4 h-4 text-emerald-600" /> VLOOKUP IMPORT (CSV)
             </button>
-            <button onClick={exportToExcel} className="flex items-center gap-2 px-5 py-2.5 bg-[#7a3aec] text-white shadow-md rounded-full text-xs font-bold hover:bg-[#6c2ee0] transition-all">
+            <button 
+              onClick={exportToExcel} 
+              className="flex items-center gap-2 px-5 py-2.5 bg-[#7a3aec] text-white shadow-md rounded-full text-xs font-bold hover:bg-[#6c2ee0] transition-all"
+            >
               <Icon name="download" className="w-4 h-4" /> EXPORT EXCEL
             </button>
           </div>
@@ -470,9 +581,11 @@ function MainApp() {
         {/* Dynamic Views */}
         <div className="flex-1 overflow-y-auto pb-8">
           
-          {/* DASHBOARD TAB */}
+          {/* DASHBOARD VIEW */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
+              
+              {/* Category Metrics */}
               <div className="grid grid-cols-4 gap-6">
                 <div className="bg-[#7a3aec] p-6 rounded-3xl text-white shadow-lg">
                   <span className="text-sm font-semibold opacity-80">Motorcycles</span>
@@ -492,10 +605,13 @@ function MainApp() {
                 </div>
               </div>
 
-              {/* Data Table */}
+              {/* Master Data Grid */}
               <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                  <h2 className="text-lg font-bold text-slate-800">Master Intelligence Grid (Active Database)</h2>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800">Master Intelligence Grid</h2>
+                    <p className="text-xs text-slate-400 mt-0.5">Click any row to open the complete details card</p>
+                  </div>
                   <span className="text-xs font-bold text-[#7a3aec] bg-[#7a3aec]/10 px-4 py-1.5 rounded-full">
                     {filteredData.length} Records Loaded
                   </span>
@@ -507,63 +623,85 @@ function MainApp() {
                         <th className="p-4">Contract No</th>
                         <th className="p-4">Vehicle No</th>
                         <th className="p-4">Client Name</th>
-                        <th className="p-4">Vehicle Type</th>
-                        <th className="p-4">Method</th>
+                        <th className="p-4">Seizer Name</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Sub-Options</th>
                         <th className="p-4">Yard Location</th>
-                        <th className="p-4">Outstanding (Rs.)</th>
-                        <th className="p-4">Client Paid</th>
-                        <th className="p-4">Seizer Payment</th>
-                        <th className="p-4">Docs</th>
-                        {isAdmin && <th className="p-4 text-center">Action</th>}
+                        <th className="p-4">Outstanding</th>
+                        <th className="p-4 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {filteredData.map(row => (
-                        <tr key={row?.id || Math.random()} className="hover:bg-slate-50">
-                          <td className="p-4 font-mono font-bold text-[#7a3aec]">{String(row?.contractNo || '')}</td>
-                          <td className="p-4 font-bold text-slate-700">{String(row?.vehicleNo || '')}</td>
-                          <td className="p-4 text-slate-600">{String(row?.clientName || '')}</td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <img src={getVehicleImage(row?.vehicleType)} alt="" className="w-10 h-7 object-cover rounded shadow-sm border" onError={(e) => { e.target.style.display = 'none'; }} />
-                              <span className="font-semibold">{String(row?.vehicleType || '')}</span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row?.actionType === 'Seized' ? 'bg-amber-100 text-amber-700' : (row?.actionType === 'Handover' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600')}`}>
-                              {String(row?.actionType || 'N/A')}
-                            </span>
-                          </td>
-                          <td className="p-4 text-slate-600 font-medium">
-                            {row?.yardLocation === 'Offsite Yard' ? `Offsite - ${row?.offsiteBranch || 'Branch'}` : String(row?.yardLocation || '')}
-                          </td>
-                          <td className="p-4 font-mono font-semibold text-blue-600">
-                            Rs. {parseFloat(String(row?.outstanding || '0').replace(/,/g, '')).toLocaleString()}
-                          </td>
-                          <td className="p-4">
-                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${row?.clientPaid === 'Yes' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                              {String(row?.clientPaid || 'No')}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row?.seizerPaymentStatus === 'Completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'}`}>
-                              {String(row?.seizerPaymentStatus || 'Pending')}
-                            </span>
-                          </td>
-                          <td className="p-4 text-xs text-slate-400">{String(row?.docs || '-')}</td>
-                          {isAdmin && (
-                            <td className="p-4 text-center">
-                              <button onClick={() => setData(prev => prev.filter(d => d?.id !== row?.id))} className="text-rose-500 hover:text-rose-700">
-                                <Icon name="trash" className="w-4 h-4" />
-                              </button>
+                      {filteredData.map(row => {
+                        const pendingCount = getPendingSubOptionsCount(row);
+                        return (
+                          <tr 
+                            key={row?.id || Math.random()} 
+                            onClick={() => setSelectedRecord(row)}
+                            className="hover:bg-purple-50/50 cursor-pointer transition-colors"
+                          >
+                            <td className="p-4 font-mono font-bold text-[#7a3aec]">{String(row?.contractNo || '')}</td>
+                            <td className="p-4 font-bold text-slate-700">{String(row?.vehicleNo || '')}</td>
+                            <td className="p-4 text-slate-600">{String(row?.clientName || '')}</td>
+                            <td className="p-4 text-slate-700 font-medium">{String(row?.seizerName || '-')}</td>
+                            <td className="p-4">
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                                row?.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                              }`}>
+                                {String(row?.status || 'N/A')}
+                              </span>
                             </td>
-                          )}
-                        </tr>
-                      ))}
+                            <td className="p-4">
+                              {pendingCount > 0 ? (
+                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 flex items-center gap-1 w-fit">
+                                  Pending ({pendingCount})
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center gap-1 w-fit">
+                                  Complete
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4 text-slate-600">
+                              {row?.yardLocation === 'Offsite' ? `Offsite (${row?.handOverBranch || 'Branch'})` : String(row?.yardLocation || '')}
+                            </td>
+                            <td className="p-4 font-mono font-semibold text-blue-600">
+                              Rs. {parseFloat(String(row?.outstanding || '0').replace(/,/g, '')).toLocaleString()}
+                            </td>
+                            <td className="p-4 text-center" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-center gap-2">
+                                <button 
+                                  onClick={() => setSelectedRecord(row)} 
+                                  className="p-1.5 bg-purple-100 text-[#7a3aec] rounded-lg text-xs font-bold hover:bg-[#7a3aec] hover:text-white transition-all"
+                                  title="View Full Details"
+                                >
+                                  <Icon name="eye" className="w-4 h-4" />
+                                </button>
+                                <button 
+                                  onClick={() => setEditingRecord({ ...row })} 
+                                  className="p-1.5 bg-blue-100 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition-all"
+                                  title="Edit & Update Sub-Options"
+                                >
+                                  <Icon name="edit" className="w-4 h-4" />
+                                </button>
+                                {isAdmin && (
+                                  <button 
+                                    onClick={() => setData(prev => prev.filter(d => d?.id !== row?.id))} 
+                                    className="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg transition-all"
+                                    title="Delete Entry"
+                                  >
+                                    <Icon name="trash" className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                   {filteredData.length === 0 && (
-                    <div className="p-8 text-center text-slate-400 text-sm">කිසිදු දත්තයක් හමු නොවීය.</div>
+                    <div className="p-8 text-center text-slate-400 text-sm">No records found matching search.</div>
                   )}
                 </div>
               </div>
@@ -572,19 +710,21 @@ function MainApp() {
 
           {/* NEW ENTRY TAB */}
           {activeTab === 'new' && (
-            <div className="max-w-3xl mx-auto bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-              <h2 className="text-2xl font-bold mb-6 text-slate-800">New Vehicle Journal Entry</h2>
+            <div className="max-w-4xl mx-auto bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+              <h2 className="text-2xl font-bold mb-2 text-slate-800">New Vehicle Journal Entry</h2>
+              <p className="text-xs text-slate-400 mb-6">Main fields marked with (*) are compulsory. Sub-options can be left empty and updated later.</p>
               
+              {/* STEP 1: MAIN COMPULSORY FIELDS */}
               {wizardStep === 1 && (
                 <div className="space-y-5">
-                  <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 mb-4">
-                    <label className="text-xs font-bold text-purple-700 uppercase block mb-2">1. Vehicle Entry Method (වාහනය ඇතුළත් වන ක්‍රමය) *</label>
+                  <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100 mb-2">
+                    <label className="text-xs font-bold text-purple-700 uppercase block mb-2">Vehicle Entry Method (Compulsory Main) *</label>
                     <div className="flex gap-4">
-                      <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Seized' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
+                      <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer transition-all ${formData.actionType === 'Seized' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Seized" checked={formData.actionType === 'Seized'} onChange={handleFormChange} className="hidden" />
                         SEIZED
                       </label>
-                      <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer ${formData.actionType === 'Handover' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
+                      <label className={`flex-1 flex items-center justify-center p-3 rounded-xl border-2 font-bold cursor-pointer transition-all ${formData.actionType === 'Handover' ? 'bg-[#7a3aec] text-white border-[#7a3aec]' : 'bg-white text-slate-700 border-slate-200'}`}>
                         <input type="radio" name="actionType" value="Handover" checked={formData.actionType === 'Handover'} onChange={handleFormChange} className="hidden" />
                         HANDOVER
                       </label>
@@ -593,19 +733,68 @@ function MainApp() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Contract No *</label>
-                      <input type="text" name="contractNo" value={formData.contractNo} onChange={handleFormChange} placeholder="e.g. WGFBA055203" className="w-full bg-slate-50 border p-3 rounded-xl uppercase font-mono font-bold" />
+                      <label className="text-xs font-bold text-slate-500 uppercase">Contract No (Main) *</label>
+                      <input type="text" name="contractNo" value={formData.contractNo} onChange={handleFormChange} placeholder="e.g. WGFBA055203" className="w-full bg-slate-50 border p-3 rounded-xl uppercase font-mono font-bold" required />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Vehicle No *</label>
-                      <input type="text" name="vehicleNo" value={formData.vehicleNo} onChange={handleFormChange} placeholder="SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl uppercase font-mono font-bold" />
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase">Client Name</label>
-                      <input type="text" name="clientName" value={formData.clientName} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl" />
+                      <label className="text-xs font-bold text-slate-500 uppercase">Vehicle No (Main) *</label>
+                      <input type="text" name="vehicleNo" value={formData.vehicleNo} onChange={handleFormChange} placeholder="e.g. SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl uppercase font-mono font-bold" required />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Vehicle Category</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Client Name (Main) *</label>
+                      <input type="text" name="clientName" value={formData.clientName} onChange={handleFormChange} placeholder="Full Name" className="w-full bg-slate-50 border p-3 rounded-xl" required />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Serial No (Seizing Order) *</label>
+                      <input type="text" name="serialNo" value={formData.serialNo} onChange={handleFormChange} placeholder="e.g. S866797" className="w-full bg-slate-50 border p-3 rounded-xl font-mono" required />
+                    </div>
+
+                    {formData.actionType === 'Seized' ? (
+                      <>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Seizer Name (Main) *</label>
+                          <select name="seizerName" value={formData.seizerName} onChange={(e) => handleSeizerSelect(e.target.value)} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold">
+                            <option value="">Select Registered Seizer</option>
+                            {safeSeizers.map(s => <option key={s.id} value={s.name}>{s.name} ({s.nic})</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Seizer ID (NIC) *</label>
+                          <input type="text" name="seizerID" value={formData.seizerID} readOnly className="w-full bg-slate-100 border p-3 rounded-xl font-mono text-slate-600" />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Seized Date (Main) *</label>
+                          <input type="date" name="seizedDate" value={formData.seizedDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Hand Over By (Main: Client / 3rd Party / Other) *</label>
+                          <select name="handOverBy" value={formData.handOverBy} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                            <option value="Client">Client</option>
+                            <option value="3rd Party">3rd Party</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Hand Over Date (Main) *</label>
+                          <input type="date" name="handOverDate" value={formData.handOverDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                        </div>
+                      </>
+                    )}
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Release Type (Main Dropdown) *</label>
+                      <select name="releaseType" value={formData.releaseType} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                        <option value="Mortgage Release">Mortgage Release</option>
+                        <option value="Garage Release">Garage Release</option>
+                        <option value="Court Release">Court Release</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Vehicle Category (Main) *</label>
                       <select name="vehicleType" value={formData.vehicleType} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold">
                         <option>Motorcycle</option>
                         <option>Three-wheeler</option>
@@ -613,84 +802,115 @@ function MainApp() {
                         <option>Lorry</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Seizer</label>
-                      <select name="seizerName" value={formData.seizerName} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold">
-                        <option value="">Select Seizer</option>
-                        {safeSeizers.map(s => <option key={s.id} value={s.name}>{s.name} ({s.nic})</option>)}
-                      </select>
-                    </div>
                   </div>
 
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 mt-4">
-                    <label className="text-xs font-bold text-slate-600 uppercase block mb-1">Yard Location *</label>
-                    <select name="yardLocation" value={formData.yardLocation} onChange={handleFormChange} className="w-full bg-white border p-3 rounded-xl font-bold text-slate-800">
-                      <option value="Kurunegala Yard">Kurunegala Yard</option>
-                      <option value="Homagama Yard">Homagama Yard</option>
-                      <option value="Offsite Yard">Offsite Yard</option>
-                    </select>
-
-                    {formData.yardLocation === 'Offsite Yard' && (
-                      <div className="mt-3">
-                        <label className="text-xs font-bold text-blue-600 uppercase block mb-1">Offsite Branch Name *</label>
-                        <input type="text" name="offsiteBranch" value={formData.offsiteBranch} onChange={handleFormChange} placeholder="e.g. Kandy Branch, Galle Branch" className="w-full bg-white border border-blue-400 p-3 rounded-xl font-semibold" />
-                      </div>
-                    )}
+                  <div className="flex gap-4 pt-4">
+                    <button onClick={submitForm} className="flex-1 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition-all">
+                      Save With Main Compulsory Fields
+                    </button>
+                    <button onClick={() => setWizardStep(2)} className="flex-1 py-4 bg-[#7a3aec] hover:bg-[#6c2ee0] text-white font-bold rounded-xl shadow-lg transition-all">
+                      Continue To Sub-Options (Optional)
+                    </button>
                   </div>
-
-                  <button onClick={() => setWizardStep(2)} className="w-full py-4 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-4">Next Step (Financials)</button>
                 </div>
               )}
 
+              {/* STEP 2: MAIN / SUB OPTIONS (NON-COMPULSORY) */}
               {wizardStep === 2 && (
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">Total Outstanding (Rs.)</label>
-                    <input type="number" name="outstanding" value={formData.outstanding} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl text-xl font-black text-blue-600" />
+                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl mb-4 text-xs text-amber-800 font-medium">
+                    Note: Sub-Options are optional right now. You can leave them blank and update them anytime later from the Dashboard.
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Client Paid?</label>
-                      <select name="clientPaid" value={formData.clientPaid} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Order Print / Reprint Date</label>
+                      <input type="date" name="orderPrintDate" value={formData.orderPrintDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Order Issued Date</label>
+                      <input type="date" name="orderIssuedDate" value={formData.orderIssuedDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Seizer Payment Release Date</label>
+                      <input type="date" name="seizerPaymentReleaseDate" value={formData.seizerPaymentReleaseDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Reprocess Request (Done Or Pending)</label>
+                      <select name="reprocessRequest" value={formData.reprocessRequest} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                        <option value="Pending">Pending</option>
+                        <option value="Done">Done</option>
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-500 uppercase">Seizer Payment Complete or Not *</label>
-                      <select name="seizerPaymentStatus" value={formData.seizerPaymentStatus} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Not Paid">Not Paid</option>
+                      <label className="text-xs font-bold text-slate-500 uppercase">H Number</label>
+                      <input type="text" name="hNumber" value={formData.hNumber} onChange={handleFormChange} placeholder="e.g. H-1199" className="w-full bg-slate-50 border p-3 rounded-xl font-mono" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Yard (Kurunegala / Offsite / Homagama)</label>
+                      <select name="yardLocation" value={formData.yardLocation} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                        <option value="Kurunegala Yard">Kurunegala</option>
+                        <option value="Homagama Yard">Homagama</option>
+                        <option value="Offsite">Offsite</option>
                       </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Recovery Officer</label>
+                      <input type="text" name="recoveryOfficer" value={formData.recoveryOfficer} onChange={handleFormChange} placeholder="Officer Name" className="w-full bg-slate-50 border p-3 rounded-xl" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Hand Over Branch (Manual Type or Pick)</label>
+                      <input 
+                        list="branches-list-options" 
+                        name="handOverBranch" 
+                        value={formData.handOverBranch} 
+                        onChange={handleFormChange} 
+                        placeholder="Type branch name..." 
+                        className="w-full bg-slate-50 border p-3 rounded-xl"
+                      />
+                      <datalist id="branches-list-options">
+                        {BRANCHES_LIST.map((b, i) => <option key={i} value={b} />)}
+                      </datalist>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Yard Date</label>
+                      <input type="date" name="yardDate" value={formData.yardDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Order Cancel Date</label>
+                      <input type="date" name="orderCancelDate" value={formData.orderCancelDate} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase">Total Outstanding (Rs.)</label>
+                      <input type="number" name="outstanding" value={formData.outstanding} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-mono text-blue-600 font-bold" />
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t">
-                    <label className="text-xs font-bold text-slate-500 uppercase block mb-2">Documents Collected</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {['docsMTA6:MTA6 Form', 'docsID:ID Copy', 'docsHForm:H Form', 'docsLetter:Handover Letter'].map(item => {
-                        const [key, label] = item.split(':');
-                        return (
-                          <label key={key} className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border cursor-pointer">
-                            <input type="checkbox" name={key} checked={Boolean(formData[key])} onChange={handleFormChange} className="w-4 h-4 accent-[#7a3aec]" />
-                            <span className="text-sm font-semibold">{label}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border cursor-pointer">
+                      <input type="checkbox" name="seizerSpecialApprove" checked={formData.seizerSpecialApprove} onChange={handleFormChange} className="w-5 h-5 accent-[#7a3aec]" />
+                      <span className="text-sm font-bold text-slate-700">Seizer Payment: Special Approve Checkbox</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border cursor-pointer">
+                      <input type="checkbox" name="informToSeizer" checked={formData.informToSeizer} onChange={handleFormChange} className="w-5 h-5 accent-[#7a3aec]" />
+                      <span className="text-sm font-bold text-slate-700">Inform to Seizer (Checkbox)</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-xl cursor-pointer col-span-2">
+                      <input type="checkbox" name="specialTerminationCase" checked={formData.specialTerminationCase} onChange={handleFormChange} className="w-5 h-5 accent-rose-600" />
+                      <span className="text-sm font-bold text-rose-700">Special Termination Letter Case: Inform to Mr.Athula Or Mr.Indika (Checkbox)</span>
+                    </label>
                   </div>
 
                   <div className="flex gap-4 pt-6">
-                    <button onClick={() => setWizardStep(1)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Back</button>
-                    <button onClick={submitForm} className="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow-lg">Save Entry</button>
+                    <button onClick={() => setWizardStep(1)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">Back to Main</button>
+                    <button onClick={submitForm} className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg transition-all">Save Full Entry</button>
                   </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* SEND FILES TO YARD TAB */}
+          {/* SEND TO YARD TAB */}
           {activeTab === 'yardfiles' && (
             <div className="max-w-5xl mx-auto flex gap-6">
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
@@ -698,19 +918,19 @@ function MainApp() {
                 <form onSubmit={submitYardDispatch} className="space-y-4">
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Contract No *</label>
-                    <input type="text" value={yardDispatch.contractNo} onChange={e => setYardDispatch({...yardDispatch, contractNo: e.target.value})} placeholder="e.g. WGFBA055203" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
+                    <input type="text" value={yardDispatch.contractNo} onChange={e => setYardDispatch({...yardDispatch, contractNo: e.target.value})} placeholder="WGFBA055203" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Vehicle No *</label>
-                    <input type="text" value={yardDispatch.vehicleNo} onChange={e => setYardDispatch({...yardDispatch, vehicleNo: e.target.value})} placeholder="e.g. SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
+                    <input type="text" value={yardDispatch.vehicleNo} onChange={e => setYardDispatch({...yardDispatch, vehicleNo: e.target.value})} placeholder="SP-BJK-1182" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-bold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom *</label>
-                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="Receiver Name" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
+                    <label className="text-xs font-bold text-slate-500 uppercase">To Whom (Recipient Name) *</label>
+                    <input type="text" value={yardDispatch.toWhom} onChange={e => setYardDispatch({...yardDispatch, toWhom: e.target.value})} placeholder="Officer Name" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">EPF No *</label>
-                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="Receiver EPF No" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
+                    <input type="text" value={yardDispatch.epfNo} onChange={e => setYardDispatch({...yardDispatch, epfNo: e.target.value})} placeholder="EPF Number" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold font-mono" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Date Sent *</label>
@@ -726,14 +946,14 @@ function MainApp() {
                       <span className="text-sm font-bold">ID Copy</span>
                     </label>
                   </div>
-                  <button type="submit" className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg mt-4">Record Dispatch</button>
+                  <button type="submit" className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg mt-4 hover:bg-blue-700 transition-all">Record Dispatch</button>
                 </form>
               </div>
 
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Dispatch History</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
-                  {safeYardFiles.length === 0 ? <p className="text-slate-400 text-sm">No dispatches recorded yet.</p> : safeYardFiles.map(f => (
+                  {safeYardFiles.length === 0 ? <p className="text-slate-400 text-sm">No recorded dispatches yet.</p> : safeYardFiles.map(f => (
                     <div key={f?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
                       <div>
                         <div className="font-bold text-blue-700">{String(f?.contractNo || '')} - {String(f?.vehicleNo || '')}</div>
@@ -748,25 +968,37 @@ function MainApp() {
             </div>
           )}
 
-          {/* MANAGE SEIZERS TAB */}
+          {/* SEIZER REGISTER (MENU 2) */}
           {activeTab === 'seizers' && (
             <div className="max-w-4xl mx-auto flex gap-6">
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 className="text-xl font-bold mb-4 text-slate-800">Add New Seizer</h3>
+                <h3 className="text-xl font-bold mb-4 text-slate-800">Seizer Register (Menu 2)</h3>
                 <form onSubmit={submitNewSeizer} className="space-y-4">
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">Seizer Name *</label>
+                    <label className="text-xs font-bold text-slate-500 uppercase">1. Seizer Name *</label>
                     <input type="text" value={newSeizer.name} onChange={e => setNewSeizer({...newSeizer, name: e.target.value})} placeholder="Mr. A.B. Perera" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase">National ID (NIC) *</label>
-                    <input type="text" value={newSeizer.nic} onChange={e => setNewSeizer({...newSeizer, nic: e.target.value})} placeholder="e.g. 851234567v" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-semibold" required />
+                    <label className="text-xs font-bold text-slate-500 uppercase">2. Seizer NIC *</label>
+                    <input type="text" value={newSeizer.nic} onChange={e => setNewSeizer({...newSeizer, nic: e.target.value})} placeholder="851234567v" className="w-full bg-slate-50 border p-3 rounded-xl font-mono uppercase font-semibold" required />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Contact Phone</label>
                     <input type="text" value={newSeizer.phone} onChange={e => setNewSeizer({...newSeizer, phone: e.target.value})} placeholder="07XXXXXXXX" className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" />
                   </div>
-                  <button type="submit" className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-2">Add Seizer</button>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">3. Account Number (with Passbook Image) *</label>
+                    <input type="text" value={newSeizer.accountNo} onChange={e => setNewSeizer({...newSeizer, accountNo: e.target.value})} placeholder="Bank Account Number" className="w-full bg-slate-50 border p-3 rounded-xl font-mono" required />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Passbook Image Upload</label>
+                    <input type="file" accept="image/*" onChange={e => handleFileUploadAsBase64(e, 'passbookImg')} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">4. Seizer Photo Upload</label>
+                    <input type="file" accept="image/*" onChange={e => handleFileUploadAsBase64(e, 'photo')} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" />
+                  </div>
+                  <button type="submit" className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-2 hover:bg-[#6c2ee0]">Register New Seizer</button>
                 </form>
               </div>
 
@@ -774,10 +1006,17 @@ function MainApp() {
                 <h3 className="text-lg font-bold mb-4 text-slate-800">Registered Seizers</h3>
                 <div className="flex-1 overflow-y-auto space-y-3">
                   {safeSeizers.map(s => (
-                    <div key={s?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex justify-between items-center">
-                      <div>
+                    <div key={s?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex items-center gap-3">
+                      {s?.photo ? (
+                        <img src={s.photo} alt="Seizer" className="w-12 h-12 rounded-xl object-cover border" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#7a3aec] flex items-center justify-center font-bold">
+                          {s?.name?.charAt(0) || 'S'}
+                        </div>
+                      )}
+                      <div className="flex-1">
                         <div className="font-bold text-slate-800">{String(s?.name || '')}</div>
-                        <div className="text-xs font-mono text-slate-500">NIC: {String(s?.nic || '')} | Tel: {String(s?.phone || 'N/A')}</div>
+                        <div className="text-xs font-mono text-slate-500">NIC: {String(s?.nic || '')} | Account: {String(s?.accountNo || 'N/A')}</div>
                       </div>
                       <span className="text-xs font-bold bg-purple-100 text-[#7a3aec] px-2.5 py-1 rounded-full">Active</span>
                     </div>
@@ -787,23 +1026,23 @@ function MainApp() {
             </div>
           )}
 
-          {/* SETTINGS / DATA RESET TAB */}
+          {/* SETTINGS / DATA RESET */}
           {activeTab === 'settings' && isAdmin && (
             <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
               <h2 className="text-2xl font-bold mb-4 text-slate-800">System Reset & Danger Zone</h2>
               <div className="bg-rose-50 border border-rose-200 p-6 rounded-2xl">
                 <h3 className="text-lg font-bold text-rose-700">Clear All System Data</h3>
-                <p className="text-sm text-rose-600 mt-1 mb-4">This will permanently delete all local storage records.</p>
+                <p className="text-sm text-rose-600 mt-1 mb-4">This will permanently delete all local storage records and restore default initial state.</p>
                 <button 
                   onClick={() => {
-                    if (window.confirm("Are you sure you want to reset all data?")) {
+                    if (window.confirm("Are you sure you want to reset all data to default?")) {
                       try { localStorage.clear(); } catch(e) {}
-                      setData(EXCEL_IMPORTED_DATA);
+                      setData([]);
                       setYardFiles([]);
-                      alert("All data reset to Excel default!");
+                      alert("All data reset successfully!");
                     }
                   }} 
-                  className="px-6 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-md hover:bg-rose-700"
+                  className="px-6 py-3 bg-rose-600 text-white font-bold rounded-xl shadow-md hover:bg-rose-700 transition-all"
                 >
                   Confirm Reset Data
                 </button>
@@ -813,6 +1052,294 @@ function MainApp() {
 
         </div>
       </main>
+
+      {/* POPUP CARD MODAL - Full Details on Click */}
+      {selectedRecord && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#7a3aec]/10 text-[#7a3aec] flex items-center justify-center font-bold">
+                  <Icon name="dashboard" className="w-5 h-5 text-[#7a3aec]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">Contract: {selectedRecord.contractNo}</h3>
+                  <p className="text-xs text-slate-400 font-mono">Vehicle No: {selectedRecord.vehicleNo}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => {
+                    setEditingRecord({ ...selectedRecord });
+                    setSelectedRecord(null);
+                  }}
+                  className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition-all flex items-center gap-1.5"
+                >
+                  <Icon name="edit" className="w-4 h-4" /> Edit Sub-Options
+                </button>
+                <button 
+                  onClick={() => setSelectedRecord(null)} 
+                  className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all"
+                >
+                  <Icon name="close" className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-8 space-y-6">
+              <div className="flex flex-wrap gap-2 pb-4 border-b">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  selectedRecord.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                }`}>
+                  Status: {selectedRecord.status}
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-[#7a3aec]">
+                  Method: {selectedRecord.actionType}
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                  Category: {selectedRecord.vehicleType}
+                </span>
+                {getPendingSubOptionsCount(selectedRecord) > 0 ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                    Sub-Options: {getPendingSubOptionsCount(selectedRecord)} Pending
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                    Sub-Options: Complete
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">1. Order & Client Details (Main)</h4>
+                <div className="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border text-sm">
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Client Name</span>
+                    <strong className="text-slate-700">{selectedRecord.clientName || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Serial No (Order)</span>
+                    <strong className="font-mono text-slate-700">{selectedRecord.serialNo || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Seizer Name</span>
+                    <strong className="text-slate-700">{selectedRecord.seizerName || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Seizer ID (NIC)</span>
+                    <strong className="font-mono text-slate-700">{selectedRecord.seizerID || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Seized Date</span>
+                    <strong className="text-slate-700">{selectedRecord.seizedDate || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Order Status</span>
+                    <strong className="text-slate-700">{selectedRecord.status}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">2. Handover & Release Information (Main)</h4>
+                <div className="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border text-sm">
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Hand Over By</span>
+                    <strong className="text-slate-700">{selectedRecord.handOverBy || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Hand Over Date</span>
+                    <strong className="text-slate-700">{selectedRecord.handOverDate || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Release Type</span>
+                    <strong className="text-slate-700">{selectedRecord.releaseType || 'N/A'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">3. Movement & Yard Sub-Options</h4>
+                <div className="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border text-sm">
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Order Print / Reprint Date</span>
+                    <strong className="text-slate-700">{selectedRecord.orderPrintDate || <span className="text-amber-600 font-bold">Pending</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Order Issued Date</span>
+                    <strong className="text-slate-700">{selectedRecord.orderIssuedDate || <span className="text-amber-600 font-bold">Pending</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Yard Location</span>
+                    <strong className="text-slate-700">{selectedRecord.yardLocation || 'N/A'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Hand Over Branch</span>
+                    <strong className="text-slate-700">{selectedRecord.handOverBranch || <span className="text-slate-400 font-normal">None</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">H Number</span>
+                    <strong className="font-mono text-slate-700">{selectedRecord.hNumber || <span className="text-amber-600 font-bold">Pending</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Recovery Officer</span>
+                    <strong className="text-slate-700">{selectedRecord.recoveryOfficer || <span className="text-amber-600 font-bold">Pending</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Yard Date</span>
+                    <strong className="text-slate-700">{selectedRecord.yardDate || <span className="text-amber-600 font-bold">Pending</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Order Cancel Date</span>
+                    <strong className="text-slate-700">{selectedRecord.orderCancelDate || <span className="text-slate-400 font-normal">None</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Reprocess Request</span>
+                    <strong className="text-slate-700">{selectedRecord.reprocessRequest || 'Pending'}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">4. Financials & Sub-Option Approvals</h4>
+                <div className="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border text-sm">
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Total Outstanding</span>
+                    <strong className="font-mono text-blue-600 text-base">
+                      Rs. {parseFloat(String(selectedRecord.outstanding || '0').replace(/,/g, '')).toLocaleString()}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Seizer Payment: Special Approve</span>
+                    <strong className="text-slate-700">{selectedRecord.seizerSpecialApprove ? 'Yes' : 'No'}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Payment Release Date</span>
+                    <strong className="text-slate-700">{selectedRecord.seizerPaymentReleaseDate || <span className="text-amber-600 font-bold">Pending</span>}</strong>
+                  </div>
+                  <div>
+                    <span className="text-xs text-slate-400 block font-medium">Inform to Seizer</span>
+                    <strong className="text-slate-700">{selectedRecord.informToSeizer ? 'Yes' : 'No'}</strong>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-xs text-slate-400 block font-medium">Special Termination Letter Case</span>
+                    <strong className="text-slate-700">{selectedRecord.specialTerminationCase ? 'Informed to Mr.Athula Or Mr.Indika' : 'None'}</strong>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="p-6 border-t border-slate-100 flex justify-end">
+              <button 
+                onClick={() => setSelectedRecord(null)}
+                className="px-6 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-700 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT & UPDATE SUB-OPTIONS MODAL */}
+      {editingRecord && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 p-8">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Update Sub-Options</h3>
+                <p className="text-xs text-slate-400 font-mono">Contract: {editingRecord.contractNo} | Vehicle: {editingRecord.vehicleNo}</p>
+              </div>
+              <button onClick={() => setEditingRecord(null)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <Icon name="close" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Order Print / Reprint Date</label>
+                  <input type="date" name="orderPrintDate" value={editingRecord.orderPrintDate || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-semibold" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Order Issued Date</label>
+                  <input type="date" name="orderIssuedDate" value={editingRecord.orderIssuedDate || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-semibold" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Seizer Payment Release Date</label>
+                  <input type="date" name="seizerPaymentReleaseDate" value={editingRecord.seizerPaymentReleaseDate || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-semibold" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Reprocess Request (Done Or Pending)</label>
+                  <select name="reprocessRequest" value={editingRecord.reprocessRequest || 'Pending'} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold">
+                    <option value="Pending">Pending</option>
+                    <option value="Done">Done</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">H Number</label>
+                  <input type="text" name="hNumber" value={editingRecord.hNumber || ''} onChange={handleEditChange} placeholder="e.g. H-1199" className="w-full bg-slate-50 border p-3 rounded-xl font-mono text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Yard (Kurunegala / Offsite / Homagama)</label>
+                  <select name="yardLocation" value={editingRecord.yardLocation || 'Kurunegala Yard'} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold">
+                    <option value="Kurunegala Yard">Kurunegala</option>
+                    <option value="Homagama Yard">Homagama</option>
+                    <option value="Offsite">Offsite</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Recovery Officer</label>
+                  <input type="text" name="recoveryOfficer" value={editingRecord.recoveryOfficer || ''} onChange={handleEditChange} placeholder="Officer Name" className="w-full bg-slate-50 border p-3 rounded-xl text-sm" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Hand Over Branch (Manual / Pick)</label>
+                  <input 
+                    list="edit-branches-datalist" 
+                    name="handOverBranch" 
+                    value={editingRecord.handOverBranch || ''} 
+                    onChange={handleEditChange} 
+                    placeholder="Enter branch name..." 
+                    className="w-full bg-slate-50 border p-3 rounded-xl text-sm"
+                  />
+                  <datalist id="edit-branches-datalist">
+                    {BRANCHES_LIST.map((b, i) => <option key={i} value={b} />)}
+                  </datalist>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Yard Date</label>
+                  <input type="date" name="yardDate" value={editingRecord.yardDate || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-semibold" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Order Cancel Date</label>
+                  <input type="date" name="orderCancelDate" value={editingRecord.orderCancelDate || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-semibold" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border cursor-pointer">
+                  <input type="checkbox" name="seizerSpecialApprove" checked={Boolean(editingRecord.seizerSpecialApprove)} onChange={handleEditChange} className="w-4 h-4 accent-[#7a3aec]" />
+                  <span className="text-xs font-bold text-slate-700">Seizer Payment: Special Approve Checkbox</span>
+                </label>
+                <label className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border cursor-pointer">
+                  <input type="checkbox" name="informToSeizer" checked={Boolean(editingRecord.informToSeizer)} onChange={handleEditChange} className="w-4 h-4 accent-[#7a3aec]" />
+                  <span className="text-xs font-bold text-slate-700">Inform to Seizer (Checkbox)</span>
+                </label>
+                <label className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-xl cursor-pointer col-span-2">
+                  <input type="checkbox" name="specialTerminationCase" checked={Boolean(editingRecord.specialTerminationCase)} onChange={handleEditChange} className="w-4 h-4 accent-rose-600" />
+                  <span className="text-xs font-bold text-rose-700">Special Termination Letter Case: Inform to Mr.Athula Or Mr.Indika (Checkbox)</span>
+                </label>
+              </div>
+
+              <div className="flex gap-4 pt-4 border-t">
+                <button onClick={() => setEditingRecord(null)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl text-sm">Cancel</button>
+                <button onClick={saveUpdatedRecord} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-lg transition-all">Save Sub-Options</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Admin Login Modal */}
       {showLogin && (
