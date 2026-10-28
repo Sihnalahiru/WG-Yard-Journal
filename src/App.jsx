@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- Error Boundary (White screen prevention) ---
+// --- Error Boundary (Prevents blank screen & catches all runtime errors) ---
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Application Runtime Error:", error, errorInfo);
   }
   render() {
     if (this.state.hasError) {
@@ -17,9 +20,9 @@ class ErrorBoundary extends Component {
             <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
               !
             </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Application Notice</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">System Notice</h2>
             <p className="text-sm text-slate-500 mb-6">
-              A temporary cache conflict was detected. Click below to clear stored cache and reload smoothly.
+              A temporary local storage conflict was detected. Click below to clear cache and refresh smoothly.
             </p>
             <button
               onClick={() => {
@@ -38,7 +41,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// --- Reliable Inline SVG Icons ---
+// --- Reliable SVG Icons (Zero Dependency) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -54,7 +57,10 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
     check: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />,
     close: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />,
     eye: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />,
-    edit: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    edit: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />,
+    clock: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />,
+    alert: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />,
+    camera: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
   };
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -74,7 +80,7 @@ const LORRY_IMG = getAssetUrl('Lorry.jpg');
 const BIKE_IMG = getAssetUrl('Motocycle.png');
 const THREE_WHEELER_IMG = getAssetUrl('Three-wheeler.png');
 
-// 129 Branches List (Exact match)
+// 129 Branches List
 const BRANCHES_LIST = [
   "Ambalangoda", "Ampara", "Anuradhapura", "Ahangama", "Akkaraipattu", "Akuressa", "Alawwa", "Ambalantota",
   "Aralaganwila", "Avissawella", "Badulla", "Balangoda", "Bandarawela", "Batticaloa", "Beliatta",
@@ -114,13 +120,32 @@ const getPendingSubOptionsCount = (item) => {
   return count;
 };
 
+// Calculate Expiry status and remaining days
+const getOrderExpiryInfo = (printDate) => {
+  if (!printDate) return { status: 'ACTIVE', daysLeft: 14, isExpiringSoon: false };
+  const pDate = new Date(printDate);
+  const today = new Date();
+  const diffTime = today - pDate;
+  const elapsedDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const daysLeft = 14 - elapsedDays;
+  if (daysLeft <= 0) {
+    return { status: 'EXPIRED', daysLeft: 0, isExpiringSoon: false };
+  }
+  return {
+    status: 'ACTIVE',
+    daysLeft,
+    isExpiringSoon: daysLeft <= 3
+  };
+};
+
 function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
+  // Safe localStorage Loader
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_db_v16');
+      const saved = localStorage.getItem('wgYard_db_v18');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -135,7 +160,7 @@ function MainApp() {
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_db_v16');
+      const saved = localStorage.getItem('wgSeizers_db_v18');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -146,7 +171,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_db_v16');
+      const saved = localStorage.getItem('wgYardFiles_db_v18');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
@@ -158,17 +183,21 @@ function MainApp() {
   // Modal States
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [editingSeizer, setEditingSeizer] = useState(null); // Edit existing seizer photo/passbook
+
+  // Quick Filter State
+  const [filterTab, setFilterTab] = useState('all');
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_db_v16', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_db_v18', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_db_v16', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_db_v18', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_db_v16', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_db_v18', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -227,15 +256,6 @@ function MainApp() {
     contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false
   });
 
-  const calculateOrderStatus = (printDate) => {
-    if (!printDate) return 'ACTIVE';
-    const pDate = new Date(printDate);
-    const today = new Date();
-    const diffTime = today - pDate;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 14 ? 'ACTIVE' : 'EXPIRED';
-  };
-
   const handleLogin = (e) => {
     e.preventDefault();
     if (loginCreds.user === 'Admin' && loginCreds.pass === '901001') {
@@ -266,12 +286,16 @@ function MainApp() {
     }));
   };
 
-  const handleFileUploadAsBase64 = (e, field) => {
+  const handleFileUploadAsBase64 = (e, field, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (uploadEvt) => {
-      setNewSeizer(prev => ({ ...prev, [field]: uploadEvt.target.result }));
+      if (isEditing) {
+        setEditingSeizer(prev => ({ ...prev, [field]: uploadEvt.target.result }));
+      } else {
+        setNewSeizer(prev => ({ ...prev, [field]: uploadEvt.target.result }));
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -286,6 +310,14 @@ function MainApp() {
     setSeizers(prev => [...prev, added]);
     setNewSeizer({ name: '', nic: '', phone: '', accountNo: '', passbookImg: '', photo: '' });
     alert("New Seizer registered successfully!");
+  };
+
+  const saveUpdatedSeizer = (e) => {
+    e.preventDefault();
+    if (!editingSeizer) return;
+    setSeizers(prev => prev.map(s => s.id === editingSeizer.id ? editingSeizer : s));
+    setEditingSeizer(null);
+    alert("Seizer documents updated successfully!");
   };
 
   // MAIN OPTIONS VALIDATION ONLY (Compulsory fields)
@@ -305,7 +337,7 @@ function MainApp() {
       return;
     }
 
-    const calculatedStatus = calculateOrderStatus(formData.orderPrintDate);
+    const expiryInfo = getOrderExpiryInfo(formData.orderPrintDate);
 
     const newEntry = {
       id: Date.now().toString(),
@@ -321,7 +353,7 @@ function MainApp() {
       handOverDate: formData.actionType === 'Handover' ? formData.handOverDate : '',
       releaseType: formData.releaseType || 'Mortgage Release',
       vehicleType: formData.vehicleType || 'Motorcycle',
-      status: calculatedStatus,
+      status: expiryInfo.status,
 
       orderPrintDate: formData.orderPrintDate || '',
       orderIssuedDate: formData.orderIssuedDate || '',
@@ -359,9 +391,14 @@ function MainApp() {
 
   const saveUpdatedRecord = () => {
     if (!editingRecord) return;
-    setData(prev => prev.map(item => item.id === editingRecord.id ? editingRecord : item));
-    if (selectedRecord && selectedRecord.id === editingRecord.id) {
-      setSelectedRecord(editingRecord);
+    const expiryInfo = getOrderExpiryInfo(editingRecord.orderPrintDate);
+    const updated = {
+      ...editingRecord,
+      status: expiryInfo.status
+    };
+    setData(prev => prev.map(item => item.id === updated.id ? updated : item));
+    if (selectedRecord && selectedRecord.id === updated.id) {
+      setSelectedRecord(updated);
     }
     setEditingRecord(null);
     alert("Sub-Options updated successfully!");
@@ -463,15 +500,40 @@ function MainApp() {
   const safeSeizers = Array.isArray(seizers) ? seizers.filter(Boolean) : INITIAL_SEIZERS;
   const safeYardFiles = Array.isArray(yardFiles) ? yardFiles.filter(Boolean) : [];
 
+  // Metrics Calculations for Actionable KPIs
+  const activeOrdersCount = safeData.filter(d => d.status === 'ACTIVE').length;
+  const expiredOrdersCount = safeData.filter(d => d.status === 'EXPIRED').length;
+  const expiringSoonCount = safeData.filter(d => getOrderExpiryInfo(d.orderPrintDate).isExpiringSoon).length;
+  const kurunegalaCount = safeData.filter(d => d.yardLocation === 'Kurunegala Yard').length;
+  const homagamaCount = safeData.filter(d => d.yardLocation === 'Homagama Yard').length;
+  const offsiteCount = safeData.filter(d => d.yardLocation === 'Offsite').length;
+  const pendingSubOptionsCount = safeData.filter(d => getPendingSubOptionsCount(d) > 0).length;
+  const totalOutstandingSum = safeData.reduce((acc, curr) => acc + parseFloat(String(curr.outstanding || 0).replace(/,/g, '') || 0), 0);
+  const specialTerminationCount = safeData.filter(d => Boolean(d.specialTerminationCase)).length;
+
+  // Filtered dataset according to Quick Filter Tab and Search Term
   const filteredData = safeData.filter(item => {
     if (!item) return false;
+    
+    // Tab Filter
+    if (filterTab === 'active' && item.status !== 'ACTIVE') return false;
+    if (filterTab === 'expiring' && !getOrderExpiryInfo(item.orderPrintDate).isExpiringSoon) return false;
+    if (filterTab === 'pending' && getPendingSubOptionsCount(item) === 0) return false;
+    if (filterTab === 'kurunegala' && item.yardLocation !== 'Kurunegala Yard') return false;
+    if (filterTab === 'homagama' && item.yardLocation !== 'Homagama Yard') return false;
+    if (filterTab === 'offsite' && item.yardLocation !== 'Offsite') return false;
+    if (filterTab === 'handover' && item.actionType !== 'Handover') return false;
+
+    // Search query filter
     const term = String(searchTerm || '').trim().toLowerCase();
     if (!term) return true;
     const cNo = String(item.contractNo || '').toLowerCase();
     const vNo = String(item.vehicleNo || '').toLowerCase();
     const cName = String(item.clientName || '').toLowerCase();
     const sName = String(item.seizerName || '').toLowerCase();
-    return cNo.includes(term) || vNo.includes(term) || cName.includes(term) || sName.includes(term);
+    const hNo = String(item.hNumber || '').toLowerCase();
+    const bName = String(item.handOverBranch || '').toLowerCase();
+    return cNo.includes(term) || vNo.includes(term) || cName.includes(term) || sName.includes(term) || hNo.includes(term) || bName.includes(term);
   });
 
   return (
@@ -554,7 +616,7 @@ function MainApp() {
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon name="search" className="w-5 h-5"/></span>
             <input 
               type="text" 
-              placeholder="Search Contract, Vehicle No, Client..." 
+              placeholder="Search Contract, Vehicle, Client, Branch..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white shadow-sm rounded-full pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#7a3aec]/30"
@@ -585,24 +647,127 @@ function MainApp() {
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
               
-              {/* Category Metrics */}
+              {/* Special Termination Critical Alert Banner */}
+              {specialTerminationCount > 0 && (
+                <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl flex items-center justify-between animate-in fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                      <Icon name="alert" className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-rose-800">Special Termination Letter Case Active!</h4>
+                      <p className="text-xs text-rose-600">There are {specialTerminationCount} record(s) flagged to Inform Mr. Athula or Mr. Indika.</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setFilterTab('all');
+                      setSearchTerm('Special Termination');
+                    }}
+                    className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition-all"
+                  >
+                    View Alerts
+                  </button>
+                </div>
+              )}
+
+              {/* Actionable KPI Summary Cards */}
               <div className="grid grid-cols-4 gap-6">
-                <div className="bg-[#7a3aec] p-6 rounded-3xl text-white shadow-lg">
-                  <span className="text-sm font-semibold opacity-80">Motorcycles</span>
-                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Motorcycle').length}</h3>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Orders Status</span>
+                    <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">
+                      14d
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-3xl font-black text-emerald-600">{activeOrdersCount}</h3>
+                    <span className="text-xs text-slate-400 font-semibold">Active</span>
+                    <span className="text-slate-300">/</span>
+                    <h4 className="text-xl font-bold text-rose-500">{expiredOrdersCount}</h4>
+                    <span className="text-xs text-slate-400 font-semibold">Expired</span>
+                  </div>
+                  {expiringSoonCount > 0 && (
+                    <div className="mt-2 text-xs font-bold text-amber-600 flex items-center gap-1">
+                      <Icon name="clock" className="w-3.5 h-3.5" /> {expiringSoonCount} order(s) expiring within 3 days
+                    </div>
+                  )}
                 </div>
-                <div className="bg-[#f59e0b] p-6 rounded-3xl text-white shadow-lg">
-                  <span className="text-sm font-semibold opacity-80">Three-Wheelers</span>
-                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Three-wheeler').length}</h3>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Yard Tracking</span>
+                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-black">
+                      Loc
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-3xl font-black text-[#7a3aec]">{kurunegalaCount + homagamaCount}</h3>
+                    <span className="text-xs text-slate-400 font-semibold">In Yard</span>
+                    <span className="text-slate-300">/</span>
+                    <h4 className="text-xl font-bold text-blue-500">{offsiteCount}</h4>
+                    <span className="text-xs text-slate-400 font-semibold">Offsite</span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400 font-medium">Kurunegala: {kurunegalaCount} | Homagama: {homagamaCount}</p>
                 </div>
-                <div className="bg-[#0ea5e9] p-6 rounded-3xl text-white shadow-lg">
-                  <span className="text-sm font-semibold opacity-80">Cars</span>
-                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Car').length}</h3>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sub-Options Audit</span>
+                    <span className="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-black">
+                      Opt
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <h3 className="text-3xl font-black text-amber-600">{pendingSubOptionsCount}</h3>
+                    <span className="text-xs text-slate-400 font-semibold">Pending Updates</span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400 font-medium">Missing H-No, Yard Date, or Officer</p>
                 </div>
-                <div className="bg-[#10b981] p-6 rounded-3xl text-white shadow-lg">
-                  <span className="text-sm font-semibold opacity-80">Lorries</span>
-                  <h3 className="text-4xl font-black mt-2">{safeData.filter(d => d?.vehicleType === 'Lorry').length}</h3>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Outstanding</span>
+                    <span className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-black">
+                      Rs
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-black text-blue-600 truncate">
+                    Rs. {totalOutstandingSum.toLocaleString()}
+                  </h3>
+                  <p className="mt-2 text-xs text-slate-400 font-medium">{safeData.length} Total Registered Contracts</p>
                 </div>
+              </div>
+
+              {/* Quick Filter Tabs */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {[
+                  { key: 'all', label: 'All Records', count: safeData.length },
+                  { key: 'active', label: 'Active Orders', count: activeOrdersCount },
+                  { key: 'expiring', label: 'Expiring Soon (<=3d)', count: expiringSoonCount, highlight: expiringSoonCount > 0 },
+                  { key: 'pending', label: 'Pending Sub-Options', count: pendingSubOptionsCount },
+                  { key: 'kurunegala', label: 'Kurunegala Yard', count: kurunegalaCount },
+                  { key: 'homagama', label: 'Homagama Yard', count: homagamaCount },
+                  { key: 'offsite', label: 'Offsite Branches', count: offsiteCount },
+                  { key: 'handover', label: 'Handover Only', count: safeData.filter(d => d.actionType === 'Handover').length }
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setFilterTab(tab.key)}
+                    className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                      filterTab === tab.key 
+                        ? 'bg-[#7a3aec] text-white shadow-md shadow-[#7a3aec]/30 scale-105' 
+                        : (tab.highlight ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-100')
+                    }`}
+                  >
+                    {tab.label}
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                      filterTab === tab.key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
               </div>
 
               {/* Master Data Grid */}
@@ -610,10 +775,10 @@ function MainApp() {
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                   <div>
                     <h2 className="text-lg font-bold text-slate-800">Master Intelligence Grid</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">Click any row to open the complete details card</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Click any row to view full popup details or edit sub-options</p>
                   </div>
                   <span className="text-xs font-bold text-[#7a3aec] bg-[#7a3aec]/10 px-4 py-1.5 rounded-full">
-                    {filteredData.length} Records Loaded
+                    {filteredData.length} Matches Found
                   </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -624,16 +789,17 @@ function MainApp() {
                         <th className="p-4">Vehicle No</th>
                         <th className="p-4">Client Name</th>
                         <th className="p-4">Seizer Name</th>
-                        <th className="p-4">Status</th>
+                        <th className="p-4">Order Status</th>
                         <th className="p-4">Sub-Options</th>
                         <th className="p-4">Yard Location</th>
                         <th className="p-4">Outstanding</th>
-                        <th className="p-4 text-center">Action</th>
+                        <th className="p-4 text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredData.map(row => {
                         const pendingCount = getPendingSubOptionsCount(row);
+                        const expiry = getOrderExpiryInfo(row?.orderPrintDate);
                         return (
                           <tr 
                             key={row?.id || Math.random()} 
@@ -645,11 +811,18 @@ function MainApp() {
                             <td className="p-4 text-slate-600">{String(row?.clientName || '')}</td>
                             <td className="p-4 text-slate-700 font-medium">{String(row?.seizerName || '-')}</td>
                             <td className="p-4">
-                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                                row?.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                              }`}>
-                                {String(row?.status || 'N/A')}
-                              </span>
+                              <div className="flex flex-col gap-0.5">
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold w-fit ${
+                                  expiry.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                                }`}>
+                                  {expiry.status}
+                                </span>
+                                {expiry.status === 'ACTIVE' && row.orderPrintDate && (
+                                  <span className={`text-[10px] font-semibold ${expiry.isExpiringSoon ? 'text-amber-600 font-bold' : 'text-slate-400'}`}>
+                                    {expiry.daysLeft}d left
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="p-4">
                               {pendingCount > 0 ? (
@@ -701,7 +874,7 @@ function MainApp() {
                     </tbody>
                   </table>
                   {filteredData.length === 0 && (
-                    <div className="p-8 text-center text-slate-400 text-sm">No records found matching search.</div>
+                    <div className="p-8 text-center text-slate-400 text-sm">No records found matching query.</div>
                   )}
                 </div>
               </div>
@@ -972,7 +1145,7 @@ function MainApp() {
           {activeTab === 'seizers' && (
             <div className="max-w-4xl mx-auto flex gap-6">
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 className="text-xl font-bold mb-4 text-slate-800">Seizer Register (Menu 2)</h3>
+                <h3 className="text-xl font-bold mb-4 text-slate-800">Register New Seizer</h3>
                 <form onSubmit={submitNewSeizer} className="space-y-4">
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">1. Seizer Name *</label>
@@ -992,33 +1165,52 @@ function MainApp() {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">Passbook Image Upload</label>
-                    <input type="file" accept="image/*" onChange={e => handleFileUploadAsBase64(e, 'passbookImg')} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" />
+                    <input type="file" accept="image/*" onChange={e => handleFileUploadAsBase64(e, 'passbookImg', false)} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-500 uppercase">4. Seizer Photo Upload</label>
-                    <input type="file" accept="image/*" onChange={e => handleFileUploadAsBase64(e, 'photo')} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" />
+                    <input type="file" accept="image/*" onChange={e => handleFileUploadAsBase64(e, 'photo', false)} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" />
                   </div>
                   <button type="submit" className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg mt-2 hover:bg-[#6c2ee0]">Register New Seizer</button>
                 </form>
               </div>
 
               <div className="w-1/2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-                <h3 className="text-lg font-bold mb-4 text-slate-800">Registered Seizers</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-slate-800">Registered Seizers</h3>
+                  <span className="text-xs font-bold text-slate-400">{safeSeizers.length} Active</span>
+                </div>
                 <div className="flex-1 overflow-y-auto space-y-3">
                   {safeSeizers.map(s => (
-                    <div key={s?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex items-center gap-3">
-                      {s?.photo ? (
-                        <img src={s.photo} alt="Seizer" className="w-12 h-12 rounded-xl object-cover border" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#7a3aec] flex items-center justify-center font-bold">
-                          {s?.name?.charAt(0) || 'S'}
+                    <div key={s?.id || Math.random()} className="p-4 bg-slate-50 rounded-2xl border flex items-center justify-between gap-3 hover:shadow-sm transition-all">
+                      <div className="flex items-center gap-3">
+                        {s?.photo ? (
+                          <img src={s.photo} alt="Seizer" className="w-12 h-12 rounded-xl object-cover border" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-purple-100 text-[#7a3aec] flex items-center justify-center font-bold">
+                            {s?.name?.charAt(0) || 'S'}
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold text-slate-800">{String(s?.name || '')}</div>
+                          <div className="text-xs font-mono text-slate-500">NIC: {String(s?.nic || '')}</div>
+                          <div className="text-xs text-slate-400">Acc: {String(s?.accountNo || 'Not Added')}</div>
+                          {s?.passbookImg && (
+                            <span className="inline-block mt-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                              Passbook Attached
+                            </span>
+                          )}
                         </div>
-                      )}
-                      <div className="flex-1">
-                        <div className="font-bold text-slate-800">{String(s?.name || '')}</div>
-                        <div className="text-xs font-mono text-slate-500">NIC: {String(s?.nic || '')} | Account: {String(s?.accountNo || 'N/A')}</div>
                       </div>
-                      <span className="text-xs font-bold bg-purple-100 text-[#7a3aec] px-2.5 py-1 rounded-full">Active</span>
+                      
+                      {/* Button to update existing seizer photo/passbook */}
+                      <button
+                        onClick={() => setEditingSeizer({ ...s })}
+                        className="px-3 py-1.5 bg-white border border-slate-200 text-[#7a3aec] hover:bg-[#7a3aec] hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
+                        title="Upload Photo or Passbook for this Seizer"
+                      >
+                        <Icon name="camera" className="w-3.5 h-3.5" /> Upload/Edit
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -1337,6 +1529,81 @@ function MainApp() {
                 <button onClick={saveUpdatedRecord} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm shadow-lg transition-all">Save Sub-Options</button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT SEIZER MODAL - Upload Photo & Passbook for existing Seizer */}
+      {editingSeizer && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-y-auto shadow-2xl border border-slate-100 p-8">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Update Seizer Documents</h3>
+                <p className="text-xs text-slate-400 font-medium">Seizer: {editingSeizer.name} ({editingSeizer.nic})</p>
+              </div>
+              <button onClick={() => setEditingSeizer(null)} className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <Icon name="close" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={saveUpdatedSeizer} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Bank Account Number *</label>
+                <input 
+                  type="text" 
+                  value={editingSeizer.accountNo || ''} 
+                  onChange={(e) => setEditingSeizer({ ...editingSeizer, accountNo: e.target.value })} 
+                  className="w-full bg-slate-50 border p-3 rounded-xl font-mono text-sm" 
+                  required 
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Contact Phone</label>
+                <input 
+                  type="text" 
+                  value={editingSeizer.phone || ''} 
+                  onChange={(e) => setEditingSeizer({ ...editingSeizer, phone: e.target.value })} 
+                  className="w-full bg-slate-50 border p-3 rounded-xl text-sm" 
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Upload Bank Passbook Image</label>
+                {editingSeizer.passbookImg && (
+                  <div className="mb-2">
+                    <img src={editingSeizer.passbookImg} alt="Passbook" className="h-20 w-auto rounded-lg border object-contain bg-slate-50 p-1" />
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => handleFileUploadAsBase64(e, 'passbookImg', true)} 
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" 
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Upload Seizer Photo</label>
+                {editingSeizer.photo && (
+                  <div className="mb-2">
+                    <img src={editingSeizer.photo} alt="Photo" className="h-20 w-auto rounded-lg border object-cover" />
+                  </div>
+                )}
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => handleFileUploadAsBase64(e, 'photo', true)} 
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-[#7a3aec]" 
+                />
+              </div>
+
+              <div className="flex gap-4 pt-4 border-t">
+                <button type="button" onClick={() => setEditingSeizer(null)} className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl text-sm">Cancel</button>
+                <button type="submit" className="flex-1 py-3 bg-[#7a3aec] text-white font-bold rounded-xl text-sm shadow-lg hover:bg-[#6c2ee0] transition-all">Save Documents</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
