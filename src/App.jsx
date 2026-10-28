@@ -1,35 +1,29 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- ERROR BOUNDARY (White Screen සම්පූර්ණයෙන්ම වළක්වා ආරක්ෂා කරයි) ---
+// --- Error Boundary (White screen වැළැක්වීමට) ---
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, errorMsg: '' };
+    this.state = { hasError: false };
   }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, errorMsg: error?.message || 'Unknown Error' };
-  }
-  componentDidCatch(error, errorInfo) {
-    console.error("ErrorBoundary caught:", error, errorInfo);
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', padding: '20px', fontFamily: 'sans-serif' }}>
-          <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '24px', maxWidth: '450px', width: '100%', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-            <div style={{ width: '60px', height: '60px', backgroundColor: '#fee2e2', color: '#ef4444', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '28px' }}>
-              ⚠️
-            </div>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>පද්ධතියේ Cache දෝෂයක් මඟහරවන ලදී</h2>
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>බ්‍රවුසරයේ පැවති පැරණි දත්ත ඉවත් කර යෙදුම නිවැරදිව ආරම්භ කිරීමට පහත බොත්තම ඔබන්න.</p>
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 text-center">
+          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">පද්ධතියේ Cache දෝෂයක් මඟහරවන ලදී</h2>
+            <p className="text-sm text-slate-500 mb-6">පරණ LocalStorage දත්ත ඉවත් කර යෙදුම නැවත විවෘත කිරීමට පහත බොත්තම ඔබන්න.</p>
             <button
               onClick={() => {
                 try { localStorage.clear(); } catch(e) {}
                 window.location.reload();
               }}
-              style={{ width: '100%', padding: '14px', backgroundColor: '#7a3aec', color: '#ffffff', fontWeight: 'bold', border: 'none', borderRadius: '14px', cursor: 'pointer', fontSize: '14px' }}
+              className="w-full py-3 bg-[#7a3aec] text-white font-bold rounded-xl shadow-lg hover:bg-[#6c2ee0] transition-all"
             >
-              Clear Cache & Open App
+              Clear Cache & Reload App
             </button>
           </div>
         </div>
@@ -39,7 +33,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// --- INLINE SVG ICONS (Icons කිසිදා කැඩී නොයන ලෙස සකසා ඇත) ---
+// --- ස්ථිර SVG Icons (කැඩී නොයන ලෙස) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -62,7 +56,6 @@ const Icon = ({ name, className = "w-5 h-5" }) => {
   );
 };
 
-// Asset paths
 const getAssetUrl = (fileName) => {
   const base = import.meta.env?.BASE_URL || './';
   return `${base.endsWith('/') ? base : base + '/'}${fileName}`;
@@ -87,15 +80,13 @@ function MainApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const fileInputRef = useRef(null);
 
-  // ආරක්ෂිත State Loaders (Crash නොවන අයුරින්)
+  // Safe LocalStorage Loaders
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_final_prod_v9');
+      const saved = localStorage.getItem('wgYard_main_prod_v10');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.filter(item => item && typeof item === 'object');
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
       }
     } catch (e) {}
     return INITIAL_DATA;
@@ -103,12 +94,10 @@ function MainApp() {
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_final_prod_v9');
+      const saved = localStorage.getItem('wgSeizers_main_prod_v10');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.filter(item => item && typeof item === 'object');
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
       }
     } catch (e) {}
     return INITIAL_SEIZERS;
@@ -116,27 +105,25 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_final_prod_v9');
+      const saved = localStorage.getItem('wgYardFiles_main_prod_v10');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter(item => item && typeof item === 'object');
-        }
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
       }
     } catch (e) {}
     return [];
   });
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_final_prod_v9', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_main_prod_v10', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_final_prod_v9', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_main_prod_v10', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_final_prod_v9', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_main_prod_v10', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,7 +155,7 @@ function MainApp() {
       setShowLogin(false);
       setLoginCreds({ user: '', pass: '' });
     } else {
-      alert("වලංගු නොවන Admin තොරතුරු!");
+      alert("වලංගු නොවන Admin මුරපදයකි!");
     }
   };
 
@@ -271,7 +258,7 @@ function MainApp() {
     document.body.removeChild(link);
   };
 
-  // --- AUTOMATIC VLOOKUP BY CONTRACT_NO (Column C) TO UPDATE CAPITAL_OUTSTANDING (Column N) ---
+  // VLOOKUP Auto Matching: Column C (CONTRACT_NO) සහ Column N (CAPITAL_OUTSTANDING)[cite: 27]
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -281,18 +268,13 @@ function MainApp() {
       try {
         const text = evt.target.result;
         const lines = text.split(/\r\n|\n/);
-
-        // VLOOKUP Map (Key: CONTRACT_NO, Value: CAPITAL_OUTSTANDING)
         const vlookupMap = {};
 
         lines.forEach((line) => {
           if (!line || !line.trim()) return;
           const cols = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/(^"|"$)/g, '').trim());
-
-          // Column C (Index 2) = CONTRACT_NO
-          // Column N (Index 13) = CAPITAL_OUTSTANDING
-          const contractNo = cols[2];
-          const outstandingVal = cols[13];
+          const contractNo = cols[2]; // Column C[cite: 27]
+          const outstandingVal = cols[13]; // Column N[cite: 27]
 
           if (
             contractNo &&
@@ -308,7 +290,6 @@ function MainApp() {
         });
 
         let updatedCount = 0;
-
         setData(prevData => {
           const safeData = Array.isArray(prevData) ? prevData.filter(Boolean) : [];
           return safeData.map(item => {
@@ -327,7 +308,7 @@ function MainApp() {
         if (updatedCount > 0) {
           alert(`Excel VLOOKUP සාර්ථකයි!\nගිවිසුම් ${updatedCount} ක Outstanding Amount එක සාර්ථකව Update කරන ලදී.`);
         } else {
-          alert("Excel ගොනුවේ Column C හි ඇති Contract Numbers සමඟ ගැළපෙන කිසිදු ගිවිසුමක් පද්ධතියේ හමු නොවීය.");
+          alert("Excel ගොනුවේ Column C හි ඇති Contract Numbers සමඟ ගැළපෙන කිසිදු ගිවිසුමක් පද්ධතියේ හමු නොවීය. කරුණාකර Column C පරීක්ෂා කරන්න.");
         }
       } catch (err) {
         alert("ගොනුව කියවීමේ දෝෂයක්. කරුණාකර නිවැරදි CSV ගොනුවක් ලබා දෙන්න.");
@@ -347,12 +328,10 @@ function MainApp() {
     }
   };
 
-  // Safe records array
   const safeData = Array.isArray(data) ? data.filter(Boolean) : INITIAL_DATA;
   const safeSeizers = Array.isArray(seizers) ? seizers.filter(Boolean) : INITIAL_SEIZERS;
   const safeYardFiles = Array.isArray(yardFiles) ? yardFiles.filter(Boolean) : [];
 
-  // Safe search filtering (String() check ensures no crash if value is a number)
   const filteredData = safeData.filter(item => {
     if (!item) return false;
     const term = String(searchTerm || '').trim().toLowerCase();
@@ -366,7 +345,7 @@ function MainApp() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', backgroundColor: '#f4f7fb' }} className="text-slate-800 font-sans">
       
-      {/* Sidebar with Commercial Credit Logo next to App Title */}
+      {/* Sidebar with Commercial Credit Logo */}
       <aside className="w-72 bg-[#7a3aec] rounded-r-3xl my-4 ml-4 shadow-2xl flex flex-col justify-between text-white z-20">
         <div>
           <div className="h-28 flex items-center justify-center border-b border-white/10 mx-4 px-2">
@@ -438,7 +417,7 @@ function MainApp() {
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".csv" className="hidden" />
             <button 
               onClick={() => fileInputRef.current?.click()} 
-              title="Upload CSV with Column C as Contract No and Column N as Capital Outstanding"
+              title="Upload CSV (Column C: Contract No, Column N: Capital Outstanding)"
               className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 shadow-sm rounded-full text-xs font-bold hover:shadow-md transition-all border border-slate-200"
             >
               <Icon name="upload" className="w-4 h-4 text-emerald-600" /> VLOOKUP IMPORT (CSV)
