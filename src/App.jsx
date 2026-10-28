@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- Error Boundary (Catches any runtime error and prevents blank screen) ---
+// --- Error Boundary (White screen prevention) ---
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -41,7 +41,7 @@ class ErrorBoundary extends Component {
   }
 }
 
-// --- Reliable Inline SVG Icons ---
+// --- Reliable SVG Icons (Zero Dependency) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />,
@@ -106,17 +106,9 @@ const INITIAL_SEIZERS = [
   { id: '2', name: 'MR. N.G.C. MENDIS', nic: '923572619v', phone: '0719876543', accountNo: '1008765432', passbookImg: '', photo: '' }
 ];
 
-// Clean 40 Excel Records
+// Excel Audit Records (Initial Data)
 const INITIAL_RECORDS = [
   { id: '1', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJK-1182', clientName: 'MR. H.S.SHALIKA SELLAHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S866797', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '2', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJW-5312', clientName: 'MR. S.D.T.S.J. FERANANDO', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S866780', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '3', contractNo: 'WGFBA060694', vehicleNo: 'SP-BGL-3152', clientName: 'MR. M.J.M. JUMAN', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S866773', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'CANCELED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '2026-07-18', informToSeizer: true, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'Yes', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '4', contractNo: 'WGMBA061994', vehicleNo: 'SP-BJX-1479', clientName: 'MR. P.G.K.M. AMARASINGHE', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S866803', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'shadeeshan', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '5', contractNo: 'WGMBA059801', vehicleNo: 'SP-BJS-6785', clientName: 'MRS. A.G.U. SHASHIKALA', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S866810', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '6', contractNo: 'WGAUA027370', vehicleNo: '58-0171', clientName: 'MR. A.G.T. SANDAMAL', vehicleType: 'Car', actionType: 'Order Issued', serialNo: '', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '7', contractNo: 'WGTWA068225', vehicleNo: 'SP-YI-3165', clientName: 'MR. M.N.M. ILHAM', vehicleType: 'Three-wheeler', actionType: 'Order Issued', serialNo: '', seizerName: 'MR. N.G.C. MENDIS', seizerID: '923572619v', orderPrintDate: '2026-07-10', orderIssuedDate: '', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '8', contractNo: 'WGMBA065723', vehicleNo: 'SP-BKC-7134', clientName: 'MR. H.P.V. NILANKA', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S867350', seizerName: 'MR. N.G.C. MENDIS', seizerID: '923572619v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-15', seizedDate: '', status: 'CANCELED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '2026-07-17', informToSeizer: true, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'Yes', seizerPaymentStatus: 'Pending', docs: '' },
-  { id: '9', contractNo: 'WGMBA065705', vehicleNo: 'SP-BKC-7089', clientName: 'MR. K.P.D. KITHSIRI', vehicleType: 'Motorcycle', actionType: 'Order Issued', serialNo: 'S867343', seizerName: 'MR. N.G.C. MENDIS', seizerID: '923572619v', orderPrintDate: '2026-08-05', orderIssuedDate: '2026-08-05', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, outstanding: '0', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
   { id: '10', contractNo: 'WGMBA065884', vehicleNo: 'SP-BKE-1731', clientName: 'MR. H.G.R. RAJKUMAR', vehicleType: 'Motorcycle', actionType: 'Seized', serialNo: 'S867336', seizerName: 'MR. N.G.C. MENDIS', seizerID: '923572619v', orderPrintDate: '2026-07-27', orderIssuedDate: '2026-07-27', seizedDate: '2026-07-27', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '2026-07-30', specialTerminationCase: false, outstanding: '42000', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Completed', docs: 'MTA6, ID Copy' },
   { id: '29', contractNo: 'WGFBA074907', vehicleNo: 'NW-WX-0186', clientName: 'MISS. H.T.M. NIHATHAMANI', vehicleType: 'Three-wheeler', actionType: 'Handover', serialNo: '', seizerName: '', seizerID: '', orderPrintDate: '', orderIssuedDate: '', seizedDate: '', status: 'ACTIVE', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: 'Client', handOverDate: '2026-09-24', releaseType: 'Mortgage Release', reprocessRequest: 'Pending', hNumber: 'H00901399', yardLocation: 'Offsite', recoveryOfficer: 'shadeeshan', handOverBranch: 'Ampara', orderCancelDate: '', informToSeizer: false, yardDate: '2026-09-26', specialTerminationCase: false, outstanding: '15000', seizerFee: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: 'MTA6, ID Copy' }
 ];
@@ -160,7 +152,7 @@ function MainApp() {
   // Safe localStorage Loader
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_db_v19');
+      const saved = localStorage.getItem('wgYard_main_v20');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -171,7 +163,7 @@ function MainApp() {
 
   const [seizers, setSeizers] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgSeizers_db_v19');
+      const saved = localStorage.getItem('wgSeizers_main_v20');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -182,7 +174,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_db_v19');
+      const saved = localStorage.getItem('wgYardFiles_main_v20');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
@@ -196,19 +188,19 @@ function MainApp() {
   const [editingRecord, setEditingRecord] = useState(null);
   const [editingSeizer, setEditingSeizer] = useState(null);
 
-  // Filter Tab State for Dashboard
+  // Quick Filter Tab
   const [filterTab, setFilterTab] = useState('all');
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_db_v19', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_main_v20', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgSeizers_db_v19', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wgSeizers_main_v20', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_db_v19', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_main_v20', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -216,10 +208,8 @@ function MainApp() {
   const [showLogin, setShowLogin] = useState(false);
   const [loginCreds, setLoginCreds] = useState({ user: '', pass: '' });
 
-  // Wizard state for entry
   const [wizardStep, setWizardStep] = useState(1);
   const [formData, setFormData] = useState({
-    // MAIN (Compulsory Options)
     contractNo: '',
     clientName: '',
     vehicleNo: '',
@@ -233,7 +223,6 @@ function MainApp() {
     releaseType: 'Mortgage Release',
     vehicleType: 'Motorcycle',
 
-    // MAIN / SUB OPTION (Optional at first, updated later)
     orderPrintDate: '',
     orderIssuedDate: '',
     seizerSpecialApprove: false,
@@ -341,7 +330,7 @@ function MainApp() {
     alert("Seizer documents updated successfully!");
   };
 
-  // MAIN OPTIONS VALIDATION ONLY (Compulsory fields)
+  // Main compulsory validation
   const submitForm = () => {
     if (!formData.contractNo || !formData.vehicleNo || !formData.clientName || !formData.serialNo) {
       alert("Contract No, Vehicle No, Client Name, and Serial No are compulsory Main fields.");
@@ -532,7 +521,7 @@ function MainApp() {
   const totalOutstandingSum = safeData.reduce((acc, curr) => acc + parseFloat(String(curr.outstanding || 0).replace(/,/g, '') || 0), 0);
   const specialTerminationCount = safeData.filter(d => Boolean(d.specialTerminationCase)).length;
 
-  // Filtered dataset according to Quick Filter Tab and Search Term
+  // Filtered dataset
   const filteredData = safeData.filter(item => {
     if (!item) return false;
     
