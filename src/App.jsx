@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 
-// --- Error Boundary (White screen prevention) ---
+// --- Error Boundary ---
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -110,7 +110,7 @@ const INITIAL_SEIZERS = [
   { id: '2', name: 'MR. N.G.C. MENDIS', nic: '923572619v', phone: '0719876543', accountNo: '1008765432', passbookImg: '', photo: '' }
 ];
 
-// Clean 40 Excel Records directly embedded from the Journal
+// Clean 40 Excel Records
 const INITIAL_RECORDS = [
   { id: '1', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJK-1182', clientName: 'MR. H.S.SHALIKA SELLAHEWA', vehicleType: 'Motorcycle', actionType: 'Order Issued', chargeType: 'Seizing Charge', serialNo: 'S866797', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: '', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, chargeAmount: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
   { id: '2', contractNo: 'WGMBA053816', vehicleNo: 'SP-BJW-5312', clientName: 'MR. S.D.T.S.J. FERANANDO', vehicleType: 'Motorcycle', actionType: 'Order Issued', chargeType: 'Seizing Charge', serialNo: 'S866780', seizerName: 'Mr. K.A.P Indika', seizerID: '781032786v', orderPrintDate: '2026-07-10', orderIssuedDate: '2026-07-11', seizedDate: '', status: 'EXPIRED', seizerSpecialApprove: false, seizerPaymentReleaseDate: '', handOverBy: '', handOverDate: '', releaseType: '', reprocessRequest: 'Pending', hNumber: '', yardLocation: 'Kurunegala Yard', recoveryOfficer: 'Madusankal', handOverBranch: '', orderCancelDate: '', informToSeizer: false, yardDate: '', specialTerminationCase: false, chargeAmount: '0', isSold: 'No', soldAmount: '0', currentBalance: '0', clientPaid: 'No', seizerPaymentStatus: 'Pending', docs: '' },
@@ -202,7 +202,7 @@ function MainApp() {
   // Safe localStorage Loader with darkred version key
   const [data, setData] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYard_final_red_v26');
+      const saved = localStorage.getItem('wgYard_final_red_v35');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -214,7 +214,7 @@ function MainApp() {
   // Persistent Seizer Vault (Protected against standard resets)
   const [seizers, setSeizers] = useState(() => {
     try {
-      const savedVault = localStorage.getItem('wg_persistent_seizers_vault_v2');
+      const savedVault = localStorage.getItem('wg_persistent_seizers_vault_v35');
       if (savedVault) {
         const parsed = JSON.parse(savedVault);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
@@ -225,7 +225,7 @@ function MainApp() {
 
   const [yardFiles, setYardFiles] = useState(() => {
     try {
-      const saved = localStorage.getItem('wgYardFiles_final_red_v26');
+      const saved = localStorage.getItem('wgYardFiles_final_red_v35');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
@@ -243,15 +243,15 @@ function MainApp() {
   const [filterTab, setFilterTab] = useState('all');
 
   useEffect(() => {
-    try { localStorage.setItem('wgYard_final_red_v26', JSON.stringify(data)); } catch (e) {}
+    try { localStorage.setItem('wgYard_final_red_v35', JSON.stringify(data)); } catch (e) {}
   }, [data]);
 
   useEffect(() => {
-    try { localStorage.setItem('wg_persistent_seizers_vault_v2', JSON.stringify(seizers)); } catch (e) {}
+    try { localStorage.setItem('wg_persistent_seizers_vault_v35', JSON.stringify(seizers)); } catch (e) {}
   }, [seizers]);
 
   useEffect(() => {
-    try { localStorage.setItem('wgYardFiles_final_red_v26', JSON.stringify(yardFiles)); } catch (e) {}
+    try { localStorage.setItem('wgYardFiles_final_red_v35', JSON.stringify(yardFiles)); } catch (e) {}
   }, [yardFiles]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -1479,8 +1479,8 @@ function MainApp() {
                   onClick={() => {
                     if (window.confirm("Reset journal records to default Excel data? (Seizers Vault will be preserved)")) {
                       try {
-                        localStorage.removeItem('wgYard_final_red_v26');
-                        localStorage.removeItem('wgYardFiles_final_red_v26');
+                        localStorage.removeItem('wgYard_final_red_v35');
+                        localStorage.removeItem('wgYardFiles_final_red_v35');
                       } catch(e) {}
                       setData(INITIAL_RECORDS);
                       setYardFiles([]);
