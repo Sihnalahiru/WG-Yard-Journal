@@ -1,4 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Component } from 'react';
+
+// --- Error Boundary (White screen prevention) ---
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Application Runtime Error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-center font-sans">
+          <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full border border-slate-200">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+              !
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">System Notice</h2>
+            <p className="text-sm text-slate-500 mb-6">
+              A temporary local storage conflict was detected. Click below to clear cache and refresh smoothly.
+            </p>
+            <button
+              onClick={() => {
+                try { localStorage.clear(); } catch(e) {}
+                window.location.reload();
+              }}
+              className="w-full py-3 bg-[#8B0000] text-white font-bold rounded-xl shadow-lg hover:bg-[#700000] transition-all"
+            >
+              Clear Cache & Launch App
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // --- Reliable SVG Icons (Zero Dependency) ---
 const Icon = ({ name, className = "w-5 h-5" }) => {
@@ -267,6 +308,15 @@ function MainApp() {
   const [yardDispatch, setYardDispatch] = useState({
     contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false
   });
+
+  const calculateOrderStatus = (printDate) => {
+    if (!printDate) return 'ACTIVE';
+    const pDate = new Date(printDate);
+    const today = new Date();
+    const diffTime = today - pDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 14 ? 'ACTIVE' : 'EXPIRED';
+  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -730,7 +780,7 @@ function MainApp() {
                 </div>
               )}
 
-              {/* Actionable KPI Summary Cards */}
+              {/* Actionable KPI Summary Cards (Modern Red Gradient Accents) */}
               <div className="grid grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
                   <div className="flex items-center justify-between mb-2">
