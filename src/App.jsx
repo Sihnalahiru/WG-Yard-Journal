@@ -205,10 +205,20 @@ function MainApp() {
       const saved = localStorage.getItem('wgYard_final_red_v35');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.filter(Boolean).map(record => ({
+          ...record,
+          yardLocation: (!record.seizedDate && (!record.handOverBy || record.handOverBy === 'N/A'))
+            ? '0'
+            : (record.yardLocation || 'Kurunegala Yard')
+        }));
       }
     } catch (e) {}
-    return INITIAL_RECORDS;
+    return INITIAL_RECORDS.map(record => ({
+      ...record,
+      yardLocation: (!record.seizedDate && (!record.handOverBy || record.handOverBy === 'N/A'))
+        ? '0'
+        : (record.yardLocation || 'Kurunegala Yard')
+    }));
   });
 
   // Persistent Seizer Vault (Protected against standard resets)
@@ -270,8 +280,9 @@ function MainApp() {
     seizedDate: '',
     actionType: 'Seized',
     chargeType: 'Seizing Charge',
-    handOverBy: 'Client',
+    handOverBy: '',
     handOverDate: '',
+    vehicleCondition: '',
     releaseType: '',
     vehicleType: 'Motorcycle',
 
@@ -306,7 +317,7 @@ function MainApp() {
   });
 
   const [yardDispatch, setYardDispatch] = useState({
-    contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false
+    contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false, sentInventory: false, sentClientLetter: false, sentHFORM: false
   });
 
   const calculateOrderStatus = (printDate) => {
@@ -335,6 +346,7 @@ function MainApp() {
         ...prev,
         actionType: 'Handover',
         chargeType: 'Transport Charge',
+        handOverBy: prev.handOverBy || 'Client',
         seizerName: prev.seizerName || 'Mr. K.A.P Indika',
         seizerID: prev.seizerID || '781032786v'
       }));
@@ -342,14 +354,23 @@ function MainApp() {
       setFormData(prev => ({
         ...prev,
         actionType: 'Seized',
-        chargeType: 'Seizing Charge'
+        chargeType: 'Seizing Charge',
+        handOverBy: prev.handOverBy || ''
       }));
     }
   };
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setFormData(prev => {
+      const next = { ...prev, [name]: type === 'checkbox' ? checked : value };
+      if (name === 'seizedDate' || name === 'handOverBy') {
+        const hasSeizureOrHandover = Boolean(next.seizedDate || (next.handOverBy && next.handOverBy !== 'N/A'));
+        if (!hasSeizureOrHandover) next.yardLocation = '0';
+        else if (!prev.seizedDate && (!prev.handOverBy || prev.handOverBy === 'N/A') && (!next.yardLocation || next.yardLocation === '0')) next.yardLocation = 'Kurunegala Yard';
+      }
+      return next;
+    });
   };
 
   const handleEditChange = (e) => {
@@ -430,8 +451,9 @@ function MainApp() {
       seizedDate: formData.seizedDate || '',
       actionType: formData.actionType || 'Seized',
       chargeType: formData.chargeType || (formData.actionType === 'Handover' ? 'Transport Charge' : 'Seizing Charge'),
-      handOverBy: formData.actionType === 'Handover' ? (formData.handOverBy || 'Client') : '',
+      handOverBy: formData.handOverBy || '',
       handOverDate: formData.actionType === 'Handover' ? formData.handOverDate : '',
+      vehicleCondition: formData.actionType === 'Handover' ? (formData.vehicleCondition || '') : '',
       releaseType: formData.releaseType || '',
       vehicleType: formData.vehicleType || 'Motorcycle',
       status: expiryInfo.status,
@@ -442,7 +464,7 @@ function MainApp() {
       seizerPaymentReleaseDate: formData.seizerPaymentReleaseDate || '',
       reprocessRequest: formData.reprocessRequest || 'Pending',
       hNumber: formData.hNumber || '',
-      yardLocation: formData.yardLocation || 'Kurunegala Yard',
+      yardLocation: (!formData.seizedDate && (!formData.handOverBy || formData.handOverBy === 'N/A')) ? '0' : (formData.yardLocation || 'Kurunegala Yard'),
       recoveryOfficer: formData.recoveryOfficer || '',
       handOverBranch: formData.handOverBranch || '',
       orderCancelDate: formData.orderCancelDate || '',
@@ -459,8 +481,9 @@ function MainApp() {
       docs: [
         formData.docsMTA6 ? 'MTA6' : '',
         formData.docsID ? 'ID Copy' : '',
-        formData.docsHForm ? 'HForm' : '',
-        formData.docsLetter ? 'Handing Over Letter' : ''
+        formData.docsHForm ? 'HFORM' : '',
+        formData.docsLetter ? 'Client Hand Over Letter' : '',
+        formData.docsInventory ? 'Inventory' : ''
       ].filter(Boolean).join(', ')
     };
 
@@ -475,6 +498,7 @@ function MainApp() {
     const expiryInfo = getOrderExpiryInfo(editingRecord.orderPrintDate);
     const updated = {
       ...editingRecord,
+      yardLocation: (!editingRecord.seizedDate && (!editingRecord.handOverBy || editingRecord.handOverBy === 'N/A')) ? '0' : (editingRecord.yardLocation || 'Kurunegala Yard'),
       status: expiryInfo.status
     };
     setData(prev => prev.map(item => item.id === updated.id ? updated : item));
@@ -498,10 +522,10 @@ function MainApp() {
       toWhom: yardDispatch.toWhom,
       epfNo: yardDispatch.epfNo,
       sentDate: yardDispatch.sentDate,
-      docs: [yardDispatch.sentMTA6 ? 'MTA6' : '', yardDispatch.sentIDCopy ? 'ID Copy' : ''].filter(Boolean).join(', ')
+      docs: [yardDispatch.sentMTA6 ? 'MTA6' : '', yardDispatch.sentIDCopy ? 'ID Copy' : '', yardDispatch.sentInventory ? 'Inventory' : '', yardDispatch.sentClientLetter ? 'Client Hand Over Letter' : '', yardDispatch.sentHFORM ? 'HFORM' : ''].filter(Boolean).join(', ')
     };
     setYardFiles(prev => [newDispatch, ...(Array.isArray(prev) ? prev : [])]);
-    setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false });
+    setYardDispatch({ contractNo: '', vehicleNo: '', toWhom: '', epfNo: '', sentDate: '', sentMTA6: false, sentIDCopy: false, sentInventory: false, sentClientLetter: false, sentHFORM: false });
     alert("Yard file dispatch recorded!");
   };
 
@@ -1154,6 +1178,7 @@ function MainApp() {
                       <select name="chargeType" value={formData.chargeType} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold text-[#991b1b]">
                         <option value="Transport Charge">Transport Charge (Handover Vehicles)</option>
                         <option value="Seizing Charge">Seizing Charge (Seized Vehicles)</option>
+                        <option value="Transport / Seizing">Transport / Seizing</option>
                       </select>
                     </div>
 
@@ -1184,11 +1209,11 @@ function MainApp() {
                           </select>
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-slate-500 uppercase">Hand Over By (Client / 3rd Party / Other) *</label>
-                          <select name="handOverBy" value={formData.handOverBy} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
-                            <option value="Client">Client</option>
-                            <option value="3rd Party">3rd Party</option>
-                            <option value="Other">Other</option>
+                          <label className="text-xs font-bold text-slate-500 uppercase">Vehicle Status</label>
+                          <select name="vehicleCondition" value={formData.vehicleCondition} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                            <option value="">Select Condition</option>
+                            <option value="Running Condition">Running Condition</option>
+                            <option value="Towing Condition">Towing Condition</option>
                           </select>
                         </div>
                         <div>
@@ -1197,6 +1222,20 @@ function MainApp() {
                         </div>
                       </>
                     )}
+
+                    <div className="col-span-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Hand Over By / Received From</label>
+                      <select name="handOverBy" value={formData.handOverBy} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                        <option value="">N/A / Not Yet Handed Over</option>
+                        <option value="Client">Client</option>
+                        <option value="3rd Party">3rd Party</option>
+                        <option value="Guarantor">Guarantor</option>
+                        <option value="Other Party">Other Party</option>
+                    <option value="Other">Other (Legacy)</option>
+                        <option value="Police">Police</option>
+                        <option value="Court">Court</option>
+                      </select>
+                    </div>
 
                     {/* Release Type is optional/blank permitted */}
                     <div>
@@ -1264,7 +1303,8 @@ function MainApp() {
                     </div>
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase">Yard (Kurunegala / Offsite / Homagama)</label>
-                      <select name="yardLocation" value={formData.yardLocation} onChange={handleFormChange} className="w-full bg-slate-50 border p-3 rounded-xl font-bold">
+                      <select name="yardLocation" value={(!formData.seizedDate && (!formData.handOverBy || formData.handOverBy === 'N/A')) ? '0' : formData.yardLocation} onChange={handleFormChange} disabled={!formData.seizedDate && (!formData.handOverBy || formData.handOverBy === 'N/A')} className="w-full bg-slate-50 border p-3 rounded-xl font-bold disabled:opacity-60">
+                        <option value="0">0 - Not Seized / Not Handed Over</option>
                         <option value="Kurunegala Yard">Kurunegala</option>
                         <option value="Homagama Yard">Homagama</option>
                         <option value="Offsite">Offsite</option>
@@ -1353,15 +1393,19 @@ function MainApp() {
                     <label className="text-xs font-bold text-slate-500 uppercase">Date Sent *</label>
                     <input type="date" value={yardDispatch.sentDate} onChange={e => setYardDispatch({...yardDispatch, sentDate: e.target.value})} className="w-full bg-slate-50 border p-3 rounded-xl font-semibold" required />
                   </div>
-                  <div className="flex gap-4 pt-2">
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={Boolean(yardDispatch.sentMTA6)} onChange={e => setYardDispatch({...yardDispatch, sentMTA6: e.target.checked})} className="w-4 h-4 accent-[#991b1b]" />
-                      <span className="text-sm font-bold">MTA 6</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={Boolean(yardDispatch.sentIDCopy)} onChange={e => setYardDispatch({...yardDispatch, sentIDCopy: e.target.checked})} className="w-4 h-4 accent-[#991b1b]" />
-                      <span className="text-sm font-bold">ID Copy</span>
-                    </label>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    {[
+                      ['sentMTA6', 'MTA6'],
+                      ['sentIDCopy', 'ID Copy'],
+                      ['sentInventory', 'Inventory'],
+                      ['sentClientLetter', 'Client Hand Over Letter'],
+                      ['sentHFORM', 'HFORM']
+                    ].map(([field, label]) => (
+                      <label key={field} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border">
+                        <input type="checkbox" checked={Boolean(yardDispatch[field])} onChange={e => setYardDispatch(prev => ({...prev, [field]: e.target.checked}))} className="w-4 h-4 accent-[#991b1b]" />
+                        <span className="text-sm font-bold">{label}</span>
+                      </label>
+                    ))}
                   </div>
                   <button type="submit" className="w-full py-3 bg-[#991b1b] text-white font-bold rounded-xl shadow-lg mt-4 hover:bg-[#7f1d1d] transition-all">Record Dispatch</button>
                 </form>
@@ -1623,6 +1667,10 @@ function MainApp() {
                     <strong className="text-slate-700">{selectedRecord.handOverDate || 'N/A'}</strong>
                   </div>
                   <div>
+                    <span className="text-xs text-slate-400 block font-medium">Vehicle Status</span>
+                    <strong className="text-slate-700">{selectedRecord.vehicleCondition || 'N/A'}</strong>
+                  </div>
+                  <div>
                     <span className="text-xs text-slate-400 block font-medium">Release Type</span>
                     <strong className="text-slate-700">{selectedRecord.releaseType || 'Not Selected'}</strong>
                   </div>
@@ -1734,6 +1782,28 @@ function MainApp() {
                   <select name="chargeType" value={editingRecord.chargeType || 'Seizing Charge'} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold text-[#991b1b]">
                     <option value="Transport Charge">Transport Charge (Handover)</option>
                     <option value="Seizing Charge">Seizing Charge (Seized)</option>
+                    <option value="Transport / Seizing">Transport / Seizing</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Hand Over By / Received From</label>
+                  <select name="handOverBy" value={editingRecord.handOverBy || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold">
+                    <option value="">N/A / Not Yet Handed Over</option>
+                    <option value="Client">Client</option>
+                    <option value="3rd Party">3rd Party</option>
+                    <option value="Guarantor">Guarantor</option>
+                    <option value="Other Party">Other Party</option>
+                    <option value="Other">Other (Legacy)</option>
+                    <option value="Police">Police</option>
+                    <option value="Court">Court</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Vehicle Status</label>
+                  <select name="vehicleCondition" value={editingRecord.vehicleCondition || ''} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold">
+                    <option value="">N/A</option>
+                    <option value="Running Condition">Running Condition</option>
+                    <option value="Towing Condition">Towing Condition</option>
                   </select>
                 </div>
                 <div>
@@ -1761,7 +1831,8 @@ function MainApp() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase">Yard (Kurunegala / Offsite / Homagama)</label>
-                  <select name="yardLocation" value={editingRecord.yardLocation || 'Kurunegala Yard'} onChange={handleEditChange} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold">
+                  <select name="yardLocation" value={(!editingRecord.seizedDate && (!editingRecord.handOverBy || editingRecord.handOverBy === 'N/A')) ? '0' : (editingRecord.yardLocation || 'Kurunegala Yard')} onChange={handleEditChange} disabled={!editingRecord.seizedDate && (!editingRecord.handOverBy || editingRecord.handOverBy === 'N/A')} className="w-full bg-slate-50 border p-3 rounded-xl text-sm font-bold disabled:opacity-60">
+                    <option value="0">0 - Not Seized / Not Handed Over</option>
                     <option value="Kurunegala Yard">Kurunegala</option>
                     <option value="Homagama Yard">Homagama</option>
                     <option value="Offsite">Offsite</option>
