@@ -21,17 +21,17 @@ class ErrorBoundary extends Component {
               !
             </div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">System Notice</h2>
-            <p className="text-sm text-slate-500 mb-6">
-              A temporary local storage conflict was detected. Click below to clear cache and refresh smoothly.
+            <p className="text-sm text-slate-600 mb-3">
+              The application encountered an error while loading. Your saved journal data has not been cleared.
             </p>
+            <pre className="mb-5 max-h-36 overflow-auto whitespace-pre-wrap break-words rounded-xl bg-slate-100 p-3 text-left text-xs text-rose-700">
+              {this.state.error?.message || 'Unknown application error'}
+            </pre>
             <button
-              onClick={() => {
-                try { localStorage.clear(); } catch(e) {}
-                window.location.reload();
-              }}
+              onClick={() => window.location.reload()}
               className="w-full py-3 bg-[#8B0000] text-white font-bold rounded-xl shadow-lg hover:bg-[#700000] transition-all"
             >
-              Clear Cache & Launch App
+              Reload Application
             </button>
           </div>
         </div>
@@ -309,7 +309,8 @@ function MainApp() {
     docsMTA6: false,
     docsID: false,
     docsHForm: false,
-    docsLetter: false
+    docsLetter: false,
+    docsInventory: false
   });
 
   const [newSeizer, setNewSeizer] = useState({
